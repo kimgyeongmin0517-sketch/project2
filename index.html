@@ -1,0 +1,2715 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRIDE — 러닝 트래킹 &amp; 트레이닝 랩</title>
+  <meta name="description" content="GPS 기반 달리기 경로 추적, 주간·월간 러닝 통계 분석, 수준별 맞춤형 훈련 계획, 날씨 맞춤 복장 추천 및 러너 커뮤니티를 제공하는 단일 파일 러닝 웹 애플리케이션" />
+  <meta property="og:title" content="STRIDE — 러닝 트래킹 &amp; 트레이닝 랩" />
+  <meta property="og:description" content="GPS 기반 달리기 경로 추적, 주간·월간 러닝 통계 분석, 수준별 맞춤형 훈련 계획, 날씨 맞춤 복장 추천 및 러너 커뮤니티" />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Outfit:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #F6F7F8;
+      --bg-card: #FFFFFF;
+      --bg-subtle: #F8FAFC;
+      --bg-muted: #F1F5F9;
+      --border: #E2E8F0;
+      --border-soft: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+      --text-faint: #94A3B8;
+      --accent: #EA580C;
+      --accent-hover: #C2410C;
+      --accent-soft: #FFF7ED;
+      --green: #16A34A;
+      --green-soft: #ECFDF5;
+      --rose: #E11D48;
+      --rose-soft: #FFF1F2;
+      --sky: #0284C7;
+      --amber: #D97706;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: 'Plus Jakarta Sans', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-canvas); color: var(--text-primary); }
+    body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; padding-bottom: 68px; }
+    @media (min-width: 768px) { body { padding-bottom: 0; } }
+    ::selection { background: rgba(234, 88, 12, 0.16); color: #7C2D12; }
+
+    .font-display { font-family: 'Outfit', 'Noto Sans KR', sans-serif; letter-spacing: -0.025em; }
+    .font-mono-tab { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .text-balance { text-wrap: balance; }
+
+    button, input, select, textarea { font-family: inherit; }
+    button { cursor: pointer; border: none; background: transparent; padding: 0; color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Layout Shell */
+    .container { max-width: 1280px; width: 100%; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+    @media (min-width: 640px) { .container { padding-left: 24px; padding-right: 24px; } }
+
+    /* Top Bar Contract: 3 zones */
+    .site-header {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    @media (min-width: 768px) { .header-inner { height: 64px; } }
+
+    .brand-mark { font-size: 20px; font-weight: 700; color: var(--text-primary); white-space: nowrap; flex-shrink: 0; letter-spacing: -0.03em; }
+    .top-nav { display: none; align-items: center; gap: 28px; }
+    @media (min-width: 768px) { .top-nav { display: flex; } }
+    .top-nav-btn {
+      padding: 8px 0; font-size: 14px; font-weight: 500; color: var(--text-muted);
+      border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0;
+      transition: color 150ms ease, border-color 150ms ease;
+    }
+    .top-nav-btn:hover { color: var(--text-primary); }
+    .top-nav-btn.active { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 16px; font-size: 13px; font-weight: 600;
+      color: #FFFFFF; background: var(--text-primary); border-radius: 12px;
+      white-space: nowrap; flex-shrink: 0; transition: background-color 150ms ease;
+    }
+    .btn-primary:hover { background: var(--accent); }
+    .btn-accent {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 18px; font-size: 13px; font-weight: 600;
+      color: #FFFFFF; background: var(--accent); border-radius: 12px;
+      white-space: nowrap; flex-shrink: 0; transition: background-color 150ms ease;
+    }
+    .btn-accent:hover { background: var(--accent-hover); }
+    .btn-soft {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 14px; font-size: 12px; font-weight: 600;
+      color: var(--text-primary); background: var(--bg-muted); border-radius: 10px;
+      white-space: nowrap; flex-shrink: 0; transition: background-color 150ms ease;
+    }
+    .btn-soft:hover { background: #E2E8F0; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    .btn-disabled, button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Main & Cards */
+    main.main-view { flex: 1; padding-top: 24px; padding-bottom: 32px; }
+    @media (min-width: 640px) { main.main-view { padding-top: 32px; } }
+    .stack-lg > * + * { margin-top: 28px; }
+    .stack-md > * + * { margin-top: 20px; }
+    .stack-sm > * + * { margin-top: 12px; }
+
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px;
+    }
+    @media (min-width: 640px) { .card { padding: 24px; } }
+    .card-tight { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; }
+    .sub-box { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; }
+
+    /* Responsive Grids */
+    .grid-12 { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 1024px) {
+      .grid-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
+      .lg-span-4 { grid-column: span 4 / span 4; }
+      .lg-span-5 { grid-column: span 5 / span 5; }
+      .lg-span-6 { grid-column: span 6 / span 6; }
+      .lg-span-7 { grid-column: span 7 / span 7; }
+      .lg-span-8 { grid-column: span 8 / span 8; }
+      .lg-span-12 { grid-column: span 12 / span 12; }
+    }
+    .grid-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    @media (min-width: 1024px) { .grid-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 1024px) { .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; } }
+
+    /* Form Controls */
+    .input, .select, .textarea {
+      width: 100%; padding: 8px 12px; font-size: 13px; color: var(--text-primary);
+      background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px;
+    }
+    .label { display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+
+    /* Segmented Tabs */
+    .seg-group { display: inline-flex; align-items: center; gap: 4px; padding: 4px; background: var(--bg-muted); border-radius: 12px; flex-wrap: wrap; }
+    .seg-btn {
+      padding: 6px 12px; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      border-radius: 8px; white-space: nowrap; flex-shrink: 0; transition: all 150ms ease;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .seg-btn.active { background: #FFFFFF; color: var(--text-primary); box-shadow: 0 1px 2px rgba(15,23,42,0.06); }
+
+    /* Tables */
+    .table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.data-table th {
+      background: var(--bg-subtle); border-bottom: 1px solid var(--border);
+      padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+    }
+    table.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+    table.data-table tr:last-child td { border-bottom: none; }
+    table.data-table tbody tr.clickable { cursor: pointer; transition: background-color 120ms ease; }
+    table.data-table tbody tr.clickable:hover { background: #F8FAFC; }
+    .text-right { text-align: right !important; }
+
+    /* Progress & Bars */
+    .progress-track { height: 8px; width: 100%; background: var(--bg-muted); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width 250ms ease; }
+
+    /* Hero Dark Showcase */
+    .hero-dark {
+      position: relative; border-radius: var(--radius-lg); overflow: hidden;
+      border: 1px solid var(--border); background: #0F172A; color: #FFFFFF;
+      min-height: 310px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .hero-dark-bg { position: absolute; inset: 0; opacity: 0.92; pointer-events: none; }
+    .hero-dark-body { position: relative; z-index: 2; padding: 24px; margin-top: auto; background: linear-gradient(to top, rgba(2,6,23,0.95) 20%, rgba(2,6,23,0.55) 75%, transparent); }
+
+    /* Map Canvas */
+    .map-box {
+      position: relative; width: 100%; background: #EFF2F0;
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden; user-select: none;
+    }
+    .map-overlay-top {
+      position: absolute; top: 10px; left: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 10px; font-size: 11px; color: var(--text-secondary);
+    }
+    .map-controls {
+      position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column;
+      background: rgba(255,255,255,0.96); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .map-ctrl-btn {
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); border-bottom: 1px solid var(--border);
+    }
+    .map-ctrl-btn:last-child { border-bottom: none; }
+    .map-ctrl-btn:hover { background: var(--bg-muted); }
+    .map-scale {
+      position: absolute; bottom: 10px; right: 10px; display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.92); border: 1px solid var(--border); border-radius: 8px;
+      padding: 4px 10px; font-size: 11px; color: var(--text-primary);
+    }
+    .map-hover-pill {
+      position: absolute; bottom: 10px; left: 10px; background: rgba(15,23,42,0.92); color: #FFFFFF;
+      border-radius: 8px; padding: 5px 10px; font-size: 12px; display: flex; align-items: center; gap: 10px;
+    }
+
+    /* Footer & Mobile Bottom Nav */
+    .site-footer { display: none; border-top: 1px solid var(--border); background: #FFFFFF; margin-top: 40px; }
+    @media (min-width: 768px) { .site-footer { display: block; } }
+    .mobile-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; height: 56px;
+      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(5, 1fr);
+    }
+    @media (min-width: 768px) { .mobile-nav { display: none; } }
+    .mobile-nav-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      min-height: 44px; font-size: 10px; color: var(--text-muted);
+    }
+    .mobile-nav-btn.active { color: var(--accent); font-weight: 600; }
+
+    /* Modal & Toast */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 50; background: rgba(2,6,23,0.52); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-panel {
+      background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-height: 90vh; overflow-y: auto;
+    }
+    .toast {
+      position: fixed; bottom: 72px; right: 16px; z-index: 60;
+      background: #0F172A; color: #FFFFFF; font-size: 12px; font-weight: 500;
+      padding: 12px 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(15,23,42,0.2);
+      max-width: calc(100vw - 32px);
+    }
+    @media (min-width: 768px) { .toast { bottom: 24px; right: 24px; } }
+
+    /* Utility helpers */
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .items-end { align-items: flex-end; }
+    .items-stretch { align-items: stretch; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+    .justify-center { justify-content: center; }
+    .gap-1 { gap: 4px; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .flex-1 { flex: 1; min-width: 0; }
+    .shrink-0 { flex-shrink: 0; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .divider-y > * + * { border-top: 1px solid var(--border-soft); }
+    .text-xs { font-size: 12px; }
+    .text-sm { font-size: 13.5px; }
+    .text-base { font-size: 15.5px; }
+    .text-lg { font-size: 18px; }
+    .text-xl { font-size: 20px; }
+    .muted { color: var(--text-muted); }
+    .accent { color: var(--accent); }
+    .bold { font-weight: 700; }
+    .semi { font-weight: 600; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+<script src="/_aistudio-iframe.js?v=29045eb3"></script></head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <button type="button" class="brand-mark font-display" data-action="nav" data-tab="dashboard">STRIDE</button>
+      <nav class="top-nav" aria-label="주 메뉴" id="desktop-nav"></nav>
+      <div id="header-actions" class="flex items-center gap-2 shrink-0">
+        <button type="button" class="btn-primary" data-action="open-add-run">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          러닝 기록 추가
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app-main" class="container main-view"></main>
+
+  <footer class="site-footer">
+    <div class="container flex items-center justify-between" style="padding-top:18px;padding-bottom:18px;font-size:12px;color:#64748B;">
+      <span>STRIDE · 개인 맞춤형 러닝 트래킹 &amp; 트레이닝 랩</span>
+      <div id="footer-auth" class="flex items-center gap-3"></div>
+    </div>
+  </footer>
+
+  <nav class="mobile-nav" aria-label="모바일 하단 메뉴" id="mobile-nav"></nav>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <script>
+  (function () {
+    'use strict';
+
+    const REFERENCE_DATE = '2026-11-22';
+    const FIREBASE_CONFIG = {
+      projectId: 'flash-branch-mk4jk',
+      appId: '1:919343797261:web:8c20dd8a4a082642b8f144',
+      apiKey: 'AIzaSyBJ3GlliTlLINSqW9lC9UFV2EgoNBi7P_k',
+      authDomain: 'flash-branch-mk4jk.firebaseapp.com',
+      firestoreDatabaseId: 'ai-studio-stride-14698139-ff78-41c7-abf9-ae30006eb810',
+      storageBucket: 'flash-branch-mk4jk.firebasestorage.app',
+      messagingSenderId: '919343797261'
+    };
+
+    const WORKOUT_TYPE_LABELS = {
+      easy: '이지 런',
+      tempo: '템포 런',
+      interval: '인터벌',
+      long: '장거리 LSD',
+      race: '레이스'
+    };
+
+    const WORKOUT_TYPE_COLORS = {
+      easy: '#16A34A',
+      tempo: '#EA580C',
+      interval: '#E11D48',
+      long: '#0284C7',
+      race: '#D97706'
+    };
+
+    const LEVEL_LABELS = {
+      beginner: '초보자',
+      intermediate: '중급자',
+      advanced: '상급자'
+    };
+
+    const GOAL_LABELS = {
+      '5k': '5K 완주 · 기록 향상',
+      '10k': '10K 기록 단축',
+      half: '하프 마라톤 (21.1km)',
+      full: '풀 마라톤 (42.2km)',
+      fitness: '체력 증진 · 꾸준한 러닝'
+    };
+
+    const CITY_PRESETS = [
+      { id: 'seoul', label: '서울', lat: 37.5665, lng: 126.9780 },
+      { id: 'busan', label: '부산', lat: 35.1796, lng: 129.0756 },
+      { id: 'daejeon', label: '대전', lat: 36.3504, lng: 127.3845 },
+      { id: 'daegu', label: '대구', lat: 35.8714, lng: 128.6014 },
+      { id: 'jeju', label: '제주', lat: 33.4996, lng: 126.5312 }
+    ];
+
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatPace(secPerKm) {
+      if (!Number.isFinite(secPerKm) || secPerKm <= 0) return "-'--\"";
+      const r = Math.round(secPerKm);
+      const m = Math.floor(r / 60);
+      const s = r % 60;
+      return m + "'" + String(s).padStart(2, '0') + '"';
+    }
+
+    function formatDuration(totalSec) {
+      if (!Number.isFinite(totalSec) || totalSec < 0) return '00:00';
+      const s = Math.round(totalSec);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      if (h > 0) return h + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+      return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+    }
+
+    function formatDurationKorean(totalSec) {
+      const s = Math.round(totalSec || 0);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      return h > 0 ? h + '시간 ' + m + '분' : m + '분';
+    }
+
+    function haversineDistanceKm(a, b) {
+      const R = 6371;
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const dLat = toRad(b.lat - a.lat);
+      const dLng = toRad(b.lng - a.lng);
+      const lat1 = toRad(a.lat);
+      const lat2 = toRad(b.lat);
+      const s1 = Math.sin(dLat / 2);
+      const s2 = Math.sin(dLng / 2);
+      const h = s1 * s1 + Math.cos(lat1) * Math.cos(lat2) * s2 * s2;
+      return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+    }
+
+    function generateSplitsFromTotal(distanceKm, durationSec, elevationGainM, avgHr) {
+      if (distanceKm <= 0 || durationSec <= 0) return [];
+      const basePace = durationSec / distanceKm;
+      const fullKms = Math.floor(distanceKm);
+      const remainder = Number((distanceKm - fullKms).toFixed(2));
+      const splits = [];
+      const totalSegments = remainder > 0.05 ? fullKms + 1 : fullKms;
+      const avgEleStep = totalSegments > 0 ? Math.round(elevationGainM / totalSegments) : 0;
+      for (let i = 1; i <= fullKms; i++) {
+        const wave = Math.sin(i * 1.4) * 6 - (i === fullKms ? 4 : 0);
+        const segPace = Math.max(195, Math.round(basePace + wave));
+        splits.push({
+          km: i,
+          distanceKm: 1,
+          durationSec: segPace,
+          paceSecPerKm: segPace,
+          elevationDiff: avgEleStep + ((i % 3) - 1) * 2,
+          avgHr: avgHr ? Math.round(avgHr + Math.min(8, i * 1.1)) : undefined
+        });
+      }
+      if (remainder > 0.05) {
+        const segPace = Math.max(195, Math.round(basePace - 5));
+        splits.push({
+          km: fullKms + 1,
+          distanceKm: remainder,
+          durationSec: Math.round(segPace * remainder),
+          paceSecPerKm: segPace,
+          elevationDiff: Math.max(0, avgEleStep),
+          avgHr: avgHr ? Math.round(avgHr + 6) : undefined
+        });
+      }
+      return splits;
+    }
+
+    function predictRaceTimeRiegel(knownDistKm, knownSec, targetDistKm) {
+      if (knownDistKm <= 0 || knownSec <= 0 || targetDistKm <= 0) return 0;
+      return Math.round(knownSec * Math.pow(targetDistKm / knownDistKm, 1.06));
+    }
+
+    function getStartOfWeekIso(dateStr) {
+      const parts = dateStr.split('-').map(Number);
+      const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+      const day = dt.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      dt.setDate(dt.getDate() + diff);
+      return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+    }
+
+    function addDaysIso(dateStr, days) {
+      const parts = dateStr.split('-').map(Number);
+      const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+      dt.setDate(dt.getDate() + days);
+      return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+    }
+
+    function computeWeeklyBuckets(runs, refDate, numWeeks) {
+      const curStart = getStartOfWeekIso(refDate);
+      const out = [];
+      for (let w = numWeeks - 1; w >= 0; w--) {
+        const start = addDaysIso(curStart, -w * 7);
+        const end = addDaysIso(start, 6);
+        const wr = runs.filter((r) => r.date >= start && r.date <= end);
+        const dist = Number(wr.reduce((a, r) => a + r.distanceKm, 0).toFixed(1));
+        const dur = wr.reduce((a, r) => a + r.durationSec, 0);
+        const elev = wr.reduce((a, r) => a + r.elevationGainM, 0);
+        const p = start.split('-');
+        out.push({
+          label: Number(p[1]) + '/' + Number(p[2]),
+          distanceKm: dist,
+          durationSec: dur,
+          runCount: wr.length,
+          avgPaceSec: dist > 0 ? Math.round(dur / dist) : 0,
+          elevationGainM: elev
+        });
+      }
+      return out;
+    }
+
+    function computeMonthlyBuckets(runs, refDate, numMonths) {
+      const p = refDate.split('-').map(Number);
+      const out = [];
+      for (let i = numMonths - 1; i >= 0; i--) {
+        const d = new Date(p[0], p[1] - 1 - i, 1);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        const mr = runs.filter((r) => r.date.startsWith(key));
+        const dist = Number(mr.reduce((a, r) => a + r.distanceKm, 0).toFixed(1));
+        const dur = mr.reduce((a, r) => a + r.durationSec, 0);
+        const elev = mr.reduce((a, r) => a + r.elevationGainM, 0);
+        out.push({
+          label: (d.getMonth() + 1) + '월',
+          distanceKm: dist,
+          durationSec: dur,
+          runCount: mr.length,
+          avgPaceSec: dist > 0 ? Math.round(dur / dist) : 0,
+          elevationGainM: elev
+        });
+      }
+      return out;
+    }
+
+    function buildPersonalizedZones(benchmark5kMin) {
+      const base = Math.max(960, Math.min(2700, benchmark5kMin * 60));
+      const p5 = base / 5;
+      const fmtR = (a, b) => formatPace(Math.round(p5 * a)) + ' ~ ' + formatPace(Math.round(p5 * b)) + '/km';
+      return [
+        { zone: 'Zone 1', name: '회복 조깅 (Recovery)', hrPercent: '60–68% HRmax', rpe: 'RPE 2–3', paceRange: fmtR(1.32, 1.44), talkTest: '노래를 부르거나 긴 대화가 매우 편한 속도' },
+        { zone: 'Zone 2', name: '이지 런 (Aerobic Base)', hrPercent: '69–78% HRmax', rpe: 'RPE 4–5', paceRange: fmtR(1.18, 1.30), talkTest: '완전한 문장으로 편하게 대화 가능한 속도' },
+        { zone: 'Zone 3', name: '마라톤 스테디 (Steady)', hrPercent: '79–84% HRmax', rpe: 'RPE 6–7', paceRange: fmtR(1.09, 1.16), talkTest: '짧은 문장으로만 대답할 수 있는 리드미컬한 속도' },
+        { zone: 'Zone 4', name: '젖산 역치 템포 (Threshold)', hrPercent: '85–91% HRmax', rpe: 'RPE 7–8', paceRange: fmtR(1.02, 1.07), talkTest: '단어 2~3개 정도만 말할 수 있는 집중 강도' },
+        { zone: 'Zone 5', name: 'VO2Max 인터벌 (Interval)', hrPercent: '92–98% HRmax', rpe: 'RPE 9–10', paceRange: fmtR(0.93, 0.99), talkTest: '대화가 어렵고 호흡이 가빠지는 고강도 질주' }
+      ];
+    }
+
+    function generatePersonalizedPlan(config) {
+      const zones = buildPersonalizedZones(config.benchmark5kMinutes);
+      const z1 = zones[0].paceRange, z2 = zones[1].paceRange, z3 = zones[2].paceRange, z4 = zones[3].paceRange, z5 = zones[4].paceRange;
+      const dayNames = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+      const mult = config.level === 'beginner' ? 1 : config.level === 'intermediate' ? 1.55 : 2.15;
+      const goalBase = { fitness: 14, '5k': 15, '10k': 20, half: 26, full: 34 };
+      const baseWeeklyKm = goalBase[config.goal] * mult;
+      const phaseMeta = [
+        { name: '기초 적응기', factor: 0.78, focus: '관절·인대 적응과 Zone 2 유산소 베이스 확립' },
+        { name: '기초 적응기', factor: 0.86, focus: '일정한 리듬의 주간 주행거리 확보' },
+        { name: '볼륨 빌드업', factor: 0.96, focus: '젖산 역치 자극과 점진적 장거리 연장' },
+        { name: '회복 디로딩', factor: 0.75, focus: '누적 피로 해소 및 다음 주기 대비 슈퍼컴펜세이션' },
+        { name: '스피드·역치 강화', factor: 1.05, focus: '목표 레이스 페이스 적응 및 인터벌 스피드 자극' },
+        { name: '피크 볼륨', factor: 1.12, focus: '가장 긴 장거리 러닝과 주간 최대 훈련량 소화' },
+        { name: '레이스 시뮬레이션', factor: 0.92, focus: '컨디션 조절 및 실전 페이스 점검' },
+        { name: '테이퍼링 · 피킹', factor: 0.65, focus: '근육 글리코겐 충전과 최상의 레이스 컨디션 완성' }
+      ];
+      const patterns = { 3: [1, 3, 6], 4: [1, 2, 4, 6], 5: [0, 1, 3, 4, 6], 6: [0, 1, 2, 3, 4, 6] };
+      const activeDays = patterns[config.daysPerWeek] || patterns[4];
+      const weeks = [];
+
+      for (let w = 0; w < 8; w++) {
+        const phase = phaseMeta[w];
+        const targetWeekKm = Math.round(baseWeeklyKm * phase.factor);
+        const sessions = dayNames.map((dayLabel, dayIdx) => {
+          if (!activeDays.includes(dayIdx)) {
+            if (dayIdx === 5 && config.daysPerWeek <= 5) {
+              return {
+                dayIndex: dayIdx, dayLabel, workoutType: 'strength',
+                title: '하체 코어 보강 · 모빌리티',
+                description: config.level === 'beginner'
+                  ? '스쿼트, 런지, 플랭크 각 2세트 및 발목·고관절 스트레칭 20분'
+                  : '싱글레그 데드리프트, 카프 레이즈, 힙 쓰러스트 3세트 + 폼롤링 25분',
+                targetDistanceKm: 0, targetPaceRange: '체중 보강 운동', targetHrZone: 'Zone 1', rpeRange: 'RPE 4–5'
+              };
+            }
+            return {
+              dayIndex: dayIdx, dayLabel, workoutType: 'rest',
+              title: '완전 휴식 및 회복',
+              description: '근섬유 재생과 수면 7~8시간 확보, 가벼운 스트레칭만 권장',
+              targetDistanceKm: 0, targetPaceRange: '휴식', targetHrZone: '회복', rpeRange: 'RPE 1'
+            };
+          }
+          if (dayIdx === 6) {
+            const longKm = Math.max(config.level === 'beginner' ? 5 : 8, Math.round(targetWeekKm * (config.goal === 'full' ? 0.36 : 0.32)));
+            return {
+              dayIndex: dayIdx, dayLabel, workoutType: 'long',
+              title: w === 7 ? '최종 점검 / 목표 레이스 데이' : '주말 장거리 LSD (' + longKm + 'km)',
+              description: config.level === 'beginner'
+                ? '대화 가능한 편안한 속도로 멈추지 않고 완주하는 데 집중하세요. 30분마다 수분 보충.'
+                : '초반 60%는 Zone 2로 안정적으로 출발하고, 후반 2~3km는 마라톤/스테디 페이스로 자연스럽게 마무리.',
+              targetDistanceKm: longKm,
+              targetPaceRange: w >= 4 && config.level !== 'beginner' ? z2 + ' → ' + z3 : z2,
+              targetHrZone: 'Zone 2–3', rpeRange: 'RPE 5–6'
+            };
+          }
+          const qualityDay = activeDays.includes(3) ? 3 : 2;
+          if (dayIdx === qualityDay) {
+            const isInterval = w % 2 === 1 && w !== 3 && w !== 7;
+            const qKm = Math.max(4, Math.round(targetWeekKm * 0.22));
+            if (config.level === 'beginner' && w < 2) {
+              return {
+                dayIndex: dayIdx, dayLabel, workoutType: 'easy',
+                title: '빌드업 조깅 + 스트라이드 4회',
+                description: '편안한 이지 런 후 마지막에 100m 경쾌한 가속 주행(스트라이드) 4세트를 추가합니다.',
+                targetDistanceKm: qKm, targetPaceRange: z2, targetHrZone: 'Zone 2', rpeRange: 'RPE 4–5'
+              };
+            }
+            if (isInterval) {
+              const reps = config.level === 'beginner' ? '400m × 5회' : config.level === 'intermediate' ? '800m × 5회' : '1,000m × 6회';
+              return {
+                dayIndex: dayIdx, dayLabel, workoutType: 'interval',
+                title: '트랙 인터벌 (' + reps + ')',
+                description: '워밍업 1.5km 후 본 세트(' + reps + ', 휴식 조깅 200m) 및 쿨다운 1km 진행.',
+                targetDistanceKm: qKm, targetPaceRange: z5, targetHrZone: 'Zone 5', rpeRange: 'RPE 8–9'
+              };
+            }
+            const tMin = config.level === 'beginner' ? 15 : config.level === 'intermediate' ? 25 : 35;
+            return {
+              dayIndex: dayIdx, dayLabel, workoutType: 'tempo',
+              title: '역치 템포 런 (' + tMin + '분 지속주)',
+              description: '워밍업 1.5km 후 일정한 역치 강도로 ' + tMin + '분간 리듬을 유지한 뒤 쿨다운 1km.',
+              targetDistanceKm: qKm, targetPaceRange: z4, targetHrZone: 'Zone 4', rpeRange: 'RPE 7–8'
+            };
+          }
+          if (dayIdx === 1 && config.level !== 'beginner' && w >= 2 && w !== 7) {
+            const sKm = Math.max(5, Math.round(targetWeekKm * 0.18));
+            return {
+              dayIndex: dayIdx, dayLabel,
+              workoutType: config.level === 'advanced' ? 'tempo' : 'easy',
+              title: config.level === 'advanced' ? '스테디 프로그레션 런 (' + sKm + 'km)' : '유산소 페이스 런 (' + sKm + 'km)',
+              description: '일정한 케이던스(175~182spm)를 유지하며 가볍고 경쾌한 착지에 집중합니다.',
+              targetDistanceKm: sKm, targetPaceRange: config.level === 'advanced' ? z3 : z2,
+              targetHrZone: config.level === 'advanced' ? 'Zone 3' : 'Zone 2', rpeRange: 'RPE 5–6'
+            };
+          }
+          const rem = Math.max(1, activeDays.length - 2);
+          const easyKm = Math.max(3, Math.round((targetWeekKm * 0.44) / rem));
+          const isRec = dayIdx === 0;
+          return {
+            dayIndex: dayIdx, dayLabel, workoutType: 'easy',
+            title: isRec ? '회복 이지 런 (' + easyKm + 'km)' : '유산소 이지 런 (' + easyKm + 'km)',
+            description: isRec
+              ? '주말 장거리 후 피로 회복을 위한 저강도 조깅. 심박수가 오르지 않게 천천히 달리세요.'
+              : '호흡이 편안한 Zone 2 영역에서 착지 충격과 자세 밸런스를 점검합니다.',
+            targetDistanceKm: easyKm, targetPaceRange: isRec ? z1 : z2,
+            targetHrZone: isRec ? 'Zone 1' : 'Zone 2', rpeRange: isRec ? 'RPE 2–3' : 'RPE 4'
+          };
+        });
+        weeks.push({
+          weekNumber: w + 1,
+          phaseName: phase.name,
+          focusSummary: phase.focus,
+          totalKm: sessions.reduce((a, s) => a + s.targetDistanceKm, 0),
+          sessions
+        });
+      }
+
+      return {
+        config,
+        title: LEVEL_LABELS[config.level] + ' ' + GOAL_LABELS[config.goal] + ' 8주 로드맵',
+        summary: '주 ' + config.daysPerWeek + '회 훈련 · 기준 5K ' + config.benchmark5kMinutes + '분 기반 개인화 페이스 존 적용',
+        weeks,
+        zones,
+        completedSessions: {}
+      };
+    }
+
+    const LEVEL_GUIDELINES = {
+      beginner: {
+        headline: '초보자 강도 조절 원칙 — 부상 예방과 유산소 습관 형성',
+        rules: [
+          { title: '대화 테스트 우선 원칙', detail: '주간 주행량의 85% 이상을 옆 사람과 문장으로 대화할 수 있는 Zone 2 속도로 유지하세요. 숨이 차면 걷기·조깅을 번갈아도 좋습니다.' },
+          { title: '주간 거리 10% 증량 상한', detail: '전주 대비 총 주행거리가 10%를 넘지 않도록 조절하며, 무릎·정강이 통증(찌릿함)이 느껴지면 즉시 이지 런을 휴식으로 전환하세요.' },
+          { title: '날씨·피로 보정 (+20~30초/km)', detail: '기온 24°C 이상 또는 수면 6시간 미만인 날에는 목표 페이스보다 20~30초/km 늦춰 심박수 155bpm 이하를 유지합니다.' }
+        ]
+      },
+      intermediate: {
+        headline: '중급자 강도 조절 원칙 — 80/20 양극화 훈련과 역치 관리',
+        rules: [
+          { title: '80/20 강도 배분 유지', detail: '일주일 훈련 중 80%는 Zone 1~2 저강도, 20%만 Zone 4~5(템포·인터벌)에 투자해 만성 피로와 정체기를 방지합니다.' },
+          { title: '아침 안정시 심박수 기반 오토레귤레이션', detail: '기상 직후 심박수가 평소보다 +6bpm 이상 높거나 다리 무거움이 2일 연속 지속되면 목요일 인터벌을 Zone 2 이지 런으로 하향 조정하세요.' },
+          { title: '장거리 후반 네거티브 스플릿', detail: '일요일 장거리 LSD는 초반을 목표 마라톤 페이스보다 25초/km 느리게 시작하고, 컨디션이 좋을 때만 마지막 2~3km를 가속합니다.' }
+        ]
+      },
+      advanced: {
+        headline: '상급자 강도 조절 원칙 — 고볼륨 피킹과 정밀 회복 관리',
+        rules: [
+          { title: '세션 간 최소 48시간 회복 간격', detail: '역치 템포(Zone 4)와 VO2Max 인터벌(Zone 5), 주말 장거리 사이에는 반드시 Zone 1~2 회복 주행을 배치해 글리코겐과 신경계를 회복합니다.' },
+          { title: 'RPE 기반 페이스 유연성 (노면·풍속 보정)', detail: '맞바람이나 언덕 구간에서는 GPS 페이스 수치에 집착하지 말고 목표 RPE(7~8)와 심박 존(85~91% HRmax)을 우선 기준으로 삼으세요.' },
+          { title: '4주 주기 디로딩 및 2주 테이퍼링', detail: '피크 볼륨 이후 4주차·8주차에는 강도는 유지하되 총 거리를 25~35% 감축해 근신경 피로를 완전히 해소합니다.' }
+        ]
+      }
+    };
+
+    // GPS Routes & 8 Curated Courses
+    const ROUTES = {
+      han: [
+        { lat: 37.5106, lng: 126.9958, ele: 12 }, { lat: 37.5119, lng: 126.9985, ele: 13 },
+        { lat: 37.5138, lng: 127.0032, ele: 14 }, { lat: 37.5159, lng: 127.0088, ele: 15 },
+        { lat: 37.5174, lng: 127.0138, ele: 13 }, { lat: 37.5192, lng: 127.0185, ele: 14 },
+        { lat: 37.5218, lng: 127.0169, ele: 18 }, { lat: 37.5236, lng: 127.0124, ele: 21 },
+        { lat: 37.5212, lng: 127.0068, ele: 17 }, { lat: 37.5186, lng: 127.0012, ele: 15 },
+        { lat: 37.5154, lng: 126.9965, ele: 19 }, { lat: 37.5122, lng: 126.9949, ele: 14 },
+        { lat: 37.5106, lng: 126.9958, ele: 12 }
+      ],
+      namsan: [
+        { lat: 37.5529, lng: 126.9882, ele: 92 }, { lat: 37.5542, lng: 126.9918, ele: 118 },
+        { lat: 37.5558, lng: 126.9964, ele: 146 }, { lat: 37.5551, lng: 127.0011, ele: 164 },
+        { lat: 37.5524, lng: 127.0029, ele: 178 }, { lat: 37.5495, lng: 126.9998, ele: 155 },
+        { lat: 37.5486, lng: 126.9946, ele: 132 }, { lat: 37.5502, lng: 126.9901, ele: 109 },
+        { lat: 37.5529, lng: 126.9882, ele: 92 }
+      ],
+      olympic: [
+        { lat: 37.5204, lng: 127.1211, ele: 24 }, { lat: 37.5218, lng: 127.1235, ele: 26 },
+        { lat: 37.5232, lng: 127.1246, ele: 25 }, { lat: 37.5241, lng: 127.1231, ele: 24 },
+        { lat: 37.5236, lng: 127.1204, ele: 25 }, { lat: 37.5219, lng: 127.1194, ele: 26 },
+        { lat: 37.5206, lng: 127.1199, ele: 25 }, { lat: 37.5204, lng: 127.1211, ele: 24 }
+      ],
+      seokchon: [
+        { lat: 37.5083, lng: 127.0981, ele: 19 }, { lat: 37.5101, lng: 127.0998, ele: 20 },
+        { lat: 37.5114, lng: 127.1032, ele: 20 }, { lat: 37.5119, lng: 127.1074, ele: 21 },
+        { lat: 37.5103, lng: 127.1095, ele: 20 }, { lat: 37.5082, lng: 127.1072, ele: 19 },
+        { lat: 37.5074, lng: 127.1031, ele: 19 }, { lat: 37.5076, lng: 127.0994, ele: 19 },
+        { lat: 37.5083, lng: 127.0981, ele: 19 }
+      ],
+      yeouido: [
+        { lat: 37.5268, lng: 126.9334, ele: 11 }, { lat: 37.5305, lng: 126.9296, ele: 12 },
+        { lat: 37.5338, lng: 126.9231, ele: 12 }, { lat: 37.5316, lng: 126.9178, ele: 14 },
+        { lat: 37.5264, lng: 126.9195, ele: 13 }, { lat: 37.5212, lng: 126.9248, ele: 15 },
+        { lat: 37.5228, lng: 126.9309, ele: 13 }, { lat: 37.5268, lng: 126.9334, ele: 11 }
+      ],
+      bugak: [
+        { lat: 37.5934, lng: 126.9645, ele: 115 }, { lat: 37.5968, lng: 126.9682, ele: 172 },
+        { lat: 37.6004, lng: 126.9739, ele: 245 }, { lat: 37.6026, lng: 126.9788, ele: 318 },
+        { lat: 37.6015, lng: 126.9829, ele: 342 }, { lat: 37.5988, lng: 126.9862, ele: 288 },
+        { lat: 37.5956, lng: 126.9814, ele: 224 }, { lat: 37.5938, lng: 126.9731, ele: 162 },
+        { lat: 37.5934, lng: 126.9645, ele: 115 }
+      ],
+      seoulforest: [
+        { lat: 37.5444, lng: 127.0374, ele: 16 }, { lat: 37.5469, lng: 127.0418, ele: 19 },
+        { lat: 37.5498, lng: 127.0456, ele: 17 }, { lat: 37.5534, lng: 127.0492, ele: 15 },
+        { lat: 37.5562, lng: 127.0445, ele: 14 }, { lat: 37.5515, lng: 127.0398, ele: 15 },
+        { lat: 37.5464, lng: 127.0342, ele: 14 }, { lat: 37.5418, lng: 127.0329, ele: 13 },
+        { lat: 37.5444, lng: 127.0374, ele: 16 }
+      ],
+      busan: [
+        { lat: 35.1532, lng: 129.1186, ele: 7 }, { lat: 35.1558, lng: 129.1249, ele: 9 },
+        { lat: 35.1574, lng: 129.1328, ele: 12 }, { lat: 35.1551, lng: 129.1424, ele: 18 },
+        { lat: 35.1528, lng: 129.1512, ele: 24 }, { lat: 35.1566, lng: 129.1586, ele: 11 },
+        { lat: 35.1588, lng: 129.1642, ele: 8 }, { lat: 35.1555, lng: 129.1561, ele: 9 }
+      ]
+    };
+
+    const COURSE_PRESETS = [
+      { id: 'course-hanriver', name: '한강 반포~잠수교 리버 루프', region: '서울 서초구 반포한강공원', distanceKm: 10.2, elevationGainM: 28, surface: '우레탄 & 평탄 아스팔트', difficulty: '입문', theme: 'river', description: '신호등 없는 평지 코스. 야간 조명과 급수대 접근성이 뛰어나 템포 런과 장거리 빌드업에 최적화된 서울 대표 러닝 코스입니다.', route: ROUTES.han },
+      { id: 'course-seokchon', name: '석촌호수 2.5km 더블 루프', region: '서울 송파구 잠실', distanceKm: 5.1, elevationGainM: 8, surface: '전용 탄성 우레탄 트랙', difficulty: '입문', theme: 'lake', description: '동호·서호 호숫가를 따라 100m 단위 거리 표지판이 설치된 완벽한 평지 순환 코스. 무릎 부담이 적어 입문자 조깅과 5K 기록 측정에 최적입니다.', route: ROUTES.seokchon },
+      { id: 'course-yeouido', name: '여의도 한강·샛강 생태 루프', region: '서울 영등포구 여의도동', distanceKm: 8.6, elevationGainM: 22, surface: '평탄 아스팔트 & 생태 흙길', difficulty: '입문', theme: 'park', description: '마포대교~서강대교 강변 구간과 샛강 생태공원 그늘길을 잇는 도심 순환 루프. 사계절 내내 쾌적한 평지 페이스 주행이 가능합니다.', route: ROUTES.yeouido },
+      { id: 'course-olympic', name: '올림픽공원 타탄 트랙 인터벌', region: '서울 송파구 방이동', distanceKm: 5.0, elevationGainM: 12, surface: '전용 탄성 트랙 & 공원 순환로', difficulty: '보통', theme: 'track', description: '일정한 랩 페이스 측정이 용이한 순환 코스. 400m/800m 인터벌이나 5K 타임 트라이얼 측정에 적합합니다.', route: ROUTES.olympic },
+      { id: 'course-seoulforest', name: '서울숲~중랑천 합수부 빌드업', region: '서울 성동구 성수동', distanceKm: 12.8, elevationGainM: 34, surface: '우드 데크 & 강변 아스팔트', difficulty: '보통', theme: 'forest', description: '서울숲 은행나무길에서 시작해 중랑천·한강 합수부를 거쳐 달리는 12.8km 장거리 코스. 주말 LSD 및 하프 마라톤 대비 훈련에 추천합니다.', route: ROUTES.seoulforest },
+      { id: 'course-busan', name: '광안리~동백섬 해변 오션 런', region: '부산 수영구·해운대구', distanceKm: 9.4, elevationGainM: 46, surface: '해변 우레탄 산책로 & 데크', difficulty: '보통', theme: 'ocean', description: '광안대교를 바라보며 광안리 해변에서 수영만 요트경기장, 동백섬 누리마루까지 이어지는 바다 전망 리커버리·템포 코스입니다.', route: ROUTES.busan },
+      { id: 'course-namsan', name: '남산 북측순환로 업힐 코스', region: '서울 중구 남산공원', distanceKm: 7.4, elevationGainM: 184, surface: '차량 통제 산책 아스팔트', difficulty: '도전', theme: 'mountain', description: '울창한 숲 그늘 아래 완만한 오르막과 내리막이 반복되는 코스. 하체 근지구력과 업힐 주법 훈련에 탁월합니다.', route: ROUTES.namsan },
+      { id: 'course-bugak', name: '북악스카이웨이 팔각정 힐 클라임', region: '서울 종로구 부암동~팔각정', distanceKm: 11.2, elevationGainM: 340, surface: '산악 포장 도로 (경사 6~9%)', difficulty: '도전', theme: 'mountain', description: '총 상승 고도 +340m의 고강도 업힐·다운힐 트레이닝 코스. 심폐 지구력과 언덕 근력 강화가 필요한 중·상급 러너에게 적합합니다.', route: ROUTES.bugak }
+    ];
+
+    function enrichRoute(pts, avgPace) {
+      return pts.map((p, idx) => ({ lat: p.lat, lng: p.lng, ele: p.ele, paceSecPerKm: Math.round(avgPace + Math.sin(idx * 1.1) * 14) }));
+    }
+
+    const INITIAL_SHOES = [
+      { id: 'shoe-1', brand: 'ASICS', model: 'Superblast 2', distanceKm: 284.5, maxKm: 650, isPrimary: true, retired: false },
+      { id: 'shoe-2', brand: 'Nike', model: 'Vaporfly 3', distanceKm: 112.0, maxKm: 400, isPrimary: false, retired: false },
+      { id: 'shoe-3', brand: 'New Balance', model: 'FuelCell Rebel v4', distanceKm: 396.2, maxKm: 550, isPrimary: false, retired: false }
+    ];
+
+    const INITIAL_RUNS = [
+      { id: 'run-1', title: '일요일 한강 장거리 LSD', date: '2026-11-22', startTime: '06:45', workoutType: 'long', distanceKm: 16.4, durationSec: 5340, avgPaceSecPerKm: 326, elevationGainM: 42, avgHr: 149, calories: 1090, shoeId: 'shoe-1', courseName: '한강 반포~잠수교 리버 루프', notes: '후반 4km 구간 마라톤 페이스로 자연스럽게 올려 마무리. 호흡 안정적.', route: enrichRoute(ROUTES.han, 326), splits: generateSplitsFromTotal(16.4, 5340, 42, 149) },
+      { id: 'run-2', title: '금요일 가벼운 회복 조깅', date: '2026-11-20', startTime: '07:10', workoutType: 'easy', distanceKm: 6.2, durationSec: 2150, avgPaceSecPerKm: 347, elevationGainM: 18, avgHr: 136, calories: 410, shoeId: 'shoe-3', courseName: '올림픽공원 타탄 트랙 인터벌', notes: '피로 풀기 위주로 케이던스 176 spm 유지.', route: enrichRoute(ROUTES.olympic, 347), splits: generateSplitsFromTotal(6.2, 2150, 18, 136) },
+      { id: 'run-3', title: '목요일 역치 템포 8K', date: '2026-11-19', startTime: '19:30', workoutType: 'tempo', distanceKm: 8.5, durationSec: 2380, avgPaceSecPerKm: 280, elevationGainM: 22, avgHr: 168, calories: 615, shoeId: 'shoe-2', courseName: '한강 반포~잠수교 리버 루프', notes: '워밍업 1.5km 후 6km 역치 4:35/km 일정 유지.', route: enrichRoute(ROUTES.han, 280), splits: generateSplitsFromTotal(8.5, 2380, 22, 168) },
+      { id: 'run-4', title: '화요일 남산 업힐 조깅', date: '2026-11-17', startTime: '06:50', workoutType: 'easy', distanceKm: 7.4, durationSec: 2560, avgPaceSecPerKm: 346, elevationGainM: 184, avgHr: 154, calories: 540, shoeId: 'shoe-1', courseName: '남산 북측순환로 업힐 코스', notes: '초반 오르막에서 보폭을 줄이고 피치를 빠르게 가져감.', route: enrichRoute(ROUTES.namsan, 346), splits: generateSplitsFromTotal(7.4, 2560, 184, 154) },
+      { id: 'run-5', title: '지난주 일요일 14K 빌드업', date: '2026-11-15', startTime: '07:00', workoutType: 'long', distanceKm: 14.0, durationSec: 4480, avgPaceSecPerKm: 320, elevationGainM: 36, avgHr: 152, calories: 930, shoeId: 'shoe-1', courseName: '한강 반포~잠수교 리버 루프', notes: '날씨가 선선해서 후반 페이스 유지가 수월했음.', route: enrichRoute(ROUTES.han, 320), splits: generateSplitsFromTotal(14.0, 4480, 36, 152) },
+      { id: 'run-6', title: '수요일 트랙 인터벌 800m×5', date: '2026-11-12', startTime: '19:45', workoutType: 'interval', distanceKm: 7.8, durationSec: 2145, avgPaceSecPerKm: 275, elevationGainM: 10, avgHr: 174, calories: 580, shoeId: 'shoe-2', courseName: '올림픽공원 타탄 트랙 인터벌', notes: '800m 인터벌 평균 3:08 (3:55/km), 회복 조깅 200m.', route: enrichRoute(ROUTES.olympic, 275), splits: generateSplitsFromTotal(7.8, 2145, 10, 174) },
+      { id: 'run-7', title: '월요일 아침 6K 이지 런', date: '2026-11-10', startTime: '06:40', workoutType: 'easy', distanceKm: 6.0, durationSec: 2040, avgPaceSecPerKm: 340, elevationGainM: 15, avgHr: 139, calories: 395, shoeId: 'shoe-3', courseName: '한강 반포~잠수교 리버 루프', route: enrichRoute(ROUTES.han, 340), splits: generateSplitsFromTotal(6.0, 2040, 15, 139) },
+      { id: 'run-8', title: '가을 10K 로드 레이스', date: '2026-11-01', startTime: '08:30', workoutType: 'race', distanceKm: 10.0, durationSec: 2630, avgPaceSecPerKm: 263, elevationGainM: 31, avgHr: 181, calories: 740, shoeId: 'shoe-2', courseName: '한강 반포~잠수교 리버 루프', notes: '10K 개인 최고 기록 경신! 43분 50초 완주.', route: enrichRoute(ROUTES.han, 263), splits: generateSplitsFromTotal(10.0, 2630, 31, 181) },
+      { id: 'run-9', title: '10월 말 장거리 적응주', date: '2026-10-25', startTime: '07:15', workoutType: 'long', distanceKm: 15.2, durationSec: 5016, avgPaceSecPerKm: 330, elevationGainM: 64, avgHr: 150, calories: 1015, shoeId: 'shoe-1', courseName: '남산 북측순환로 업힐 코스', route: enrichRoute(ROUTES.namsan, 330), splits: generateSplitsFromTotal(15.2, 5016, 64, 150) },
+      { id: 'run-10', title: '10월 중순 템포 7K', date: '2026-10-14', startTime: '19:20', workoutType: 'tempo', distanceKm: 7.0, durationSec: 1995, avgPaceSecPerKm: 285, elevationGainM: 18, avgHr: 166, calories: 510, shoeId: 'shoe-3', courseName: '한강 반포~잠수교 리버 루프', route: enrichRoute(ROUTES.han, 285), splits: generateSplitsFromTotal(7.0, 1995, 18, 166) },
+      { id: 'run-11', title: '9월 말 이지 런', date: '2026-09-24', startTime: '06:55', workoutType: 'easy', distanceKm: 9.5, durationSec: 3230, avgPaceSecPerKm: 340, elevationGainM: 45, avgHr: 142, calories: 630, shoeId: 'shoe-1', courseName: '올림픽공원 타탄 트랙 인터벌', route: enrichRoute(ROUTES.olympic, 340), splits: generateSplitsFromTotal(9.5, 3230, 45, 142) }
+    ];
+
+    const INITIAL_POSTS = [
+      {
+        id: 'sample-post-1', authorId: 'runner-kim', authorName: '김서준', title: '반포한강공원 일출 템포 런 10K',
+        caption: '기온 8도, 맞바람이 살짝 있었지만 4km 이후부터 리듬이 딱 맞았습니다. 이번 주 장거리 전 좋은 자극이 되었네요!',
+        workoutType: 'tempo', distanceKm: 10.2, durationSec: 2840, avgPaceSecPerKm: 278, elevationGainM: 28,
+        courseName: '한강 반포~잠수교 리버 루프', route: enrichRoute(ROUTES.han, 278),
+        cheersCount: 14, commentsCount: 2, createdAtLabel: '2시간 전', cheeredByMe: false,
+        comments: [
+          { id: 'c-1', authorId: 'runner-park', authorName: '박지현', text: '새벽 바람 뚫고 4분 38초 페이스 멋지십니다!', createdAtLabel: '1시간 전' },
+          { id: 'c-2', authorId: 'runner-lee', authorName: '이도윤', text: '반포 루프 오늘 노면 상태 어떤가요?', createdAtLabel: '40분 전' }
+        ]
+      },
+      {
+        id: 'sample-post-2', authorId: 'runner-park', authorName: '박지현', title: '남산 북측순환로 업힐 지구력 훈련',
+        caption: '초반 오르막에서 심박을 160 이하로 눌러가며 주행했습니다. 땀은 많이 났지만 후반 내리막 탄력이 정말 좋았어요.',
+        workoutType: 'long', distanceKm: 11.4, durationSec: 3960, avgPaceSecPerKm: 347, elevationGainM: 215,
+        courseName: '남산 북측순환로 업힐 코스', route: enrichRoute(ROUTES.namsan, 347),
+        cheersCount: 21, commentsCount: 1, createdAtLabel: '어제', cheeredByMe: false,
+        comments: [
+          { id: 'c-3', authorId: 'runner-kim', authorName: '김서준', text: '상승 고도 215m 대단합니다. 회복 잘 하세요!', createdAtLabel: '18시간 전' }
+        ]
+      }
+    ];
+
+    const INITIAL_CHALLENGES = [
+      {
+        id: 'challenge-nov-100k', creatorId: 'runner-kim', creatorName: '김서준',
+        title: '11월 누적 100km 완주 챌린지', description: '한 달 동안 주 3~4회 꾸준히 달려 누적 100km를 함께 달성하는 유산소 베이스 챌린지입니다.',
+        category: 'distance', targetValue: 100, unit: 'km', startDate: '2026-11-01', endDate: '2026-11-30',
+        participantCount: 4, joinedByMe: true, myProgress: 76.3,
+        participants: [
+          { userId: 'runner-kim', displayName: '김서준', currentValue: 92.4 },
+          { userId: 'me-local', displayName: '나 (내 기록)', currentValue: 76.3 },
+          { userId: 'runner-park', displayName: '박지현', currentValue: 68.0 },
+          { userId: 'runner-lee', displayName: '이도윤', currentValue: 54.5 }
+        ]
+      },
+      {
+        id: 'challenge-streak-12', creatorId: 'runner-park', creatorName: '박지현',
+        title: '주 3회 이상 · 11월 12회 출석 런', description: '속도보다 꾸준함에 집중! 거리와 상관없이 한 달 12번 이상 러닝화를 신고 밖으로 나가는 챌린지.',
+        category: 'runs', targetValue: 12, unit: '회', startDate: '2026-11-01', endDate: '2026-11-30',
+        participantCount: 3, joinedByMe: false, myProgress: 8,
+        participants: [
+          { userId: 'runner-park', displayName: '박지현', currentValue: 11 },
+          { userId: 'runner-kim', displayName: '김서준', currentValue: 10 },
+          { userId: 'runner-lee', displayName: '이도윤', currentValue: 7 }
+        ]
+      },
+      {
+        id: 'challenge-hill-600', creatorId: 'runner-lee', creatorName: '이도윤',
+        title: '남산·북악 600m 업힐 정복', description: '누적 상승 고도 600m를 채워 하체 근력과 심폐 역치를 동시에 끌어올리는 힐 트레이닝 그룹입니다.',
+        category: 'elevation', targetValue: 600, unit: 'm', startDate: '2026-11-10', endDate: '2026-12-10',
+        participantCount: 3, joinedByMe: false, myProgress: 358,
+        participants: [
+          { userId: 'runner-lee', displayName: '이도윤', currentValue: 520 },
+          { userId: 'runner-park', displayName: '박지현', currentValue: 410 },
+          { userId: 'runner-kim', displayName: '김서준', currentValue: 295 }
+        ]
+      }
+    ];
+
+    function loadLocal(key, fallback) {
+      try {
+        const raw = window.localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function saveLocalState() {
+      try {
+        window.localStorage.setItem('stride_runs_v1', JSON.stringify(state.runs));
+        window.localStorage.setItem('stride_shoes_v1', JSON.stringify(state.shoes));
+        window.localStorage.setItem('stride_weekly_goal_v1', JSON.stringify(state.weeklyGoalKm));
+        window.localStorage.setItem('stride_plan_v1', JSON.stringify(state.plan));
+        window.localStorage.setItem('stride_posts_v1', JSON.stringify(state.posts));
+        window.localStorage.setItem('stride_challenges_v1', JSON.stringify(state.challenges));
+      } catch (e) {}
+    }
+
+    const DEFAULT_PLAN = generatePersonalizedPlan({
+      goal: '10k', level: 'intermediate', daysPerWeek: 4, benchmark5kMinutes: 24, generatedAt: REFERENCE_DATE
+    });
+
+    const state = {
+      activeTab: 'dashboard',
+      user: null,
+      fb: null,
+      runs: loadLocal('stride_runs_v1', INITIAL_RUNS),
+      shoes: loadLocal('stride_shoes_v1', INITIAL_SHOES),
+      weeklyGoalKm: loadLocal('stride_weekly_goal_v1', 45),
+      plan: loadLocal('stride_plan_v1', DEFAULT_PLAN),
+      posts: loadLocal('stride_posts_v1', INITIAL_POSTS),
+      challenges: loadLocal('stride_challenges_v1', INITIAL_CHALLENGES),
+      // Dashboard UI state
+      editingGoal: false,
+      goalInput: '45',
+      selectedDayIdx: null,
+      showAddShoe: false,
+      // Weather UI state
+      weatherCityId: 'auto',
+      weatherLoading: true,
+      weatherGeoMsg: '',
+      weather: null,
+      // Live tracker UI state
+      liveMode: 'sim',
+      liveCourseId: COURSE_PRESETS[0].id,
+      simTargetPaceSec: 315,
+      simSpeedMult: 5,
+      liveStatus: 'idle',
+      liveElapsedSec: 0,
+      liveDistKm: 0,
+      liveCurrentPaceSec: 0,
+      liveRoute: [],
+      liveLaps: [],
+      liveGpsNotice: '',
+      liveTitle: '',
+      liveWorkoutType: 'easy',
+      liveShoeId: '',
+      // Training plan UI state
+      planWeekNum: 1,
+      // Analytics UI state
+      periodMode: 'weekly',
+      selectedBucketIdx: null,
+      logFilterType: 'all',
+      logSearch: '',
+      courseDifficulty: '전체',
+      calcDistKm: '10',
+      calcMin: '50',
+      calcSec: '00',
+      // Community UI state
+      communitySubTab: 'feed',
+      expandedPostId: null,
+      commentDrafts: {},
+      showCreateChallenge: false,
+      // Modals & Map zoom
+      selectedRunId: null,
+      previewCourseId: null,
+      showAddRunModal: false,
+      showExportModal: false,
+      addRunPreset: null,
+      addRunError: '',
+      mapZooms: {},
+      liveShoeCustom: ''
+    };
+    state.expandedPostId = state.posts[0] ? state.posts[0].id : null;
+    state.liveShoeId = (state.shoes.find((s) => s.isPrimary) || state.shoes[0] || {}).id || '';
+
+    function getRunShoeLabel(run) {
+      if (!run) return '';
+      if (run.shoeId) {
+        const sh = state.shoes.find((s) => s.id === run.shoeId);
+        if (sh) return sh.brand + ' ' + sh.model;
+      }
+      return run.shoeName || '';
+    }
+
+    // Inline SVG Icons
+    function svgIcon(name, size) {
+      const s = size || 16;
+      const attrs = 'width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+      const paths = {
+        compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+        activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+        calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+        bar: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+        users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        play: '<polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/>',
+        pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+        plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+        minus: '<path d="M5 12h14"/>',
+        max: '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/>',
+        share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+        trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+        edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+        check: '<polyline points="20 6 9 17 4 12"/>',
+        checkCircle: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+        circle: '<circle cx="12" cy="12" r="10"/>',
+        flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+        nav: '<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+        reset: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+        save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+        search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+        map: '<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/>',
+        x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+        heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+        heartFill: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor"/>',
+        msg: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+        send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+        trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+        locate: '<line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/>',
+        refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+        sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+        cloud: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+        rain: '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>',
+        snow: '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>',
+        storm: '<path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/>',
+        wind: '<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>',
+        droplet: '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+        login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/>'
+      };
+      return '<svg ' + attrs + ' style="flex-shrink:0;">' + (paths[name] || '') + '</svg>';
+    }
+
+    function getPaceColor(paceSec) {
+      if (!paceSec || paceSec <= 0) return '#EA580C';
+      if (paceSec <= 285) return '#E11D48';
+      if (paceSec <= 325) return '#EA580C';
+      return '#16A34A';
+    }
+
+    function renderRouteMap(mapId, points, heightPx, showControls, showBeacon) {
+      const zoom = state.mapZooms[mapId] || 1;
+      const W = 640, H = 380, pad = 44;
+      let coords = [], kmMarkers = [], scaleLabel = '200 m', centerText = '37.5150° N, 127.0050° E';
+
+      if (points && points.length > 0) {
+        const lats = points.map((p) => p.lat), lngs = points.map((p) => p.lng);
+        const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+        const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+        const midLat = (minLat + maxLat) / 2, midLng = (minLng + maxLng) / 2;
+        const lngScale = Math.cos((midLat * Math.PI) / 180);
+        const spanX = Math.max(0.0018, (maxLng - minLng) * lngScale);
+        const spanY = Math.max(0.0018, maxLat - minLat);
+        const fitScale = Math.min((W - pad * 2) / spanX, (H - pad * 2) / spanY) * zoom;
+
+        let cumKm = 0;
+        coords = points.map((pt, i) => {
+          if (i > 0) cumKm += haversineDistanceKm(points[i - 1], pt);
+          return {
+            x: W / 2 + (pt.lng - midLng) * lngScale * fitScale,
+            y: H / 2 - (pt.lat - midLat) * fitScale,
+            pt, cumKm
+          };
+        });
+
+        let nextKm = 1;
+        for (let i = 1; i < coords.length; i++) {
+          if (coords[i].cumKm >= nextKm) {
+            kmMarkers.push({ km: nextKm, x: coords[i].x, y: coords[i].y });
+            nextKm++;
+          }
+        }
+        const kmPer80 = (80 / fitScale) * 111.32;
+        scaleLabel = kmPer80 >= 1 ? kmPer80.toFixed(1) + ' km' : Math.max(20, Math.round(kmPer80 * 1000)) + ' m';
+        centerText = midLat.toFixed(4) + '° N, ' + midLng.toFixed(4) + '° E';
+      }
+
+      const patId = 'grid-' + mapId.replace(/[^a-zA-Z0-9]/g, '');
+      const polyStr = coords.map((c) => c.x.toFixed(1) + ',' + c.y.toFixed(1)).join(' ');
+      let segs = '';
+      for (let i = 1; i < coords.length; i++) {
+        const prev = coords[i - 1], cur = coords[i];
+        segs += '<line x1="' + prev.x.toFixed(1) + '" y1="' + prev.y.toFixed(1) + '" x2="' + cur.x.toFixed(1) + '" y2="' + cur.y.toFixed(1) + '" stroke="' + getPaceColor(cur.pt.paceSecPerKm) + '" stroke-width="4.5" stroke-linecap="round" />';
+      }
+      const hits = coords.map((c) => {
+        const info = c.cumKm.toFixed(2) + ' km' + (c.pt.paceSecPerKm ? ' · ' + formatPace(c.pt.paceSecPerKm) + '/km' : '') + (c.pt.ele !== undefined ? ' · 고도 ' + Math.round(c.pt.ele) + ' m' : '');
+        return '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="10" fill="transparent" data-map-hover="' + esc(mapId) + '" data-hover-info="' + esc(info) + '" style="cursor:pointer" />';
+      }).join('');
+
+      const markers = kmMarkers.map((m) =>
+        '<g transform="translate(' + m.x.toFixed(1) + ',' + m.y.toFixed(1) + ')"><circle r="9" fill="#0F172A" stroke="#FFFFFF" stroke-width="1.8"/><text y="3.5" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="700" font-family="JetBrains Mono, monospace">' + m.km + '</text></g>'
+      ).join('');
+
+      const startPt = coords[0], endPt = coords[coords.length - 1];
+      const startSvg = startPt ? '<circle cx="' + startPt.x.toFixed(1) + '" cy="' + startPt.y.toFixed(1) + '" r="7" fill="#16A34A" stroke="#FFFFFF" stroke-width="2.5"/>' : '';
+      const endSvg = endPt ? (showBeacon ? '<circle cx="' + endPt.x.toFixed(1) + '" cy="' + endPt.y.toFixed(1) + '" r="15" fill="#EA580C" opacity="0.22"/>' : '') + '<circle cx="' + endPt.x.toFixed(1) + '" cy="' + endPt.y.toFixed(1) + '" r="7.5" fill="#EA580C" stroke="#FFFFFF" stroke-width="2.5"/>' : '';
+
+      return '' +
+        '<div class="map-box" style="height:' + (heightPx || 280) + 'px;" data-map-wrap="' + esc(mapId) + '">' +
+          '<svg viewBox="0 0 640 380" style="width:100%;height:100%;display:block;" role="img" aria-label="GPS 경로 지도">' +
+            '<defs>' +
+              '<pattern id="' + patId + '-m" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="#E2E8F0" stroke-width="0.8"/></pattern>' +
+              '<pattern id="' + patId + '" width="128" height="128" patternUnits="userSpaceOnUse"><rect width="128" height="128" fill="url(#' + patId + '-m)"/><path d="M 128 0 L 0 0 0 128" fill="none" stroke="#CBD5E1" stroke-width="1.1"/></pattern>' +
+            '</defs>' +
+            '<rect width="640" height="380" fill="#F4F6F5"/>' +
+            '<rect width="640" height="380" fill="url(#' + patId + ')"/>' +
+            '<path d="M -20 315 Q 170 265 340 295 T 660 250 L 660 390 L -20 390 Z" fill="#DDE9EC" opacity="0.65"/>' +
+            '<path d="M 40 70 Q 210 30 390 85 T 620 55" fill="none" stroke="#DCE5DD" stroke-width="28" stroke-linecap="round" opacity="0.55"/>' +
+            (coords.length === 0
+              ? '<text x="320" y="190" text-anchor="middle" fill="#64748B" font-size="13" font-weight="500">GPS 경로 좌표가 기록되면 지도에 표시됩니다</text>'
+              : '<polyline fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" points="' + polyStr + '"/>' + segs + markers + startSvg + endSvg + hits) +
+          '</svg>' +
+          '<div class="map-overlay-top">' +
+            '<span class="font-mono-tab semi" style="color:#0F172A;">' + centerText + '</span>' +
+            '<span style="color:#CBD5E1;">|</span>' +
+            '<span class="flex items-center gap-1"><span style="width:10px;height:4px;border-radius:99px;background:#16A34A;display:inline-block;"></span>이지</span>' +
+            '<span class="flex items-center gap-1"><span style="width:10px;height:4px;border-radius:99px;background:#EA580C;display:inline-block;"></span>템포</span>' +
+            '<span class="flex items-center gap-1"><span style="width:10px;height:4px;border-radius:99px;background:#E11D48;display:inline-block;"></span>질주</span>' +
+          '</div>' +
+          '<div class="map-hover-pill font-mono-tab" id="hover-' + esc(mapId) + '" style="display:none;"></div>' +
+          '<div class="map-scale font-mono-tab"><span style="width:44px;height:6px;border-left:1px solid #334155;border-right:1px solid #334155;border-bottom:1px solid #334155;display:inline-block;"></span><span>' + scaleLabel + '</span></div>' +
+          (showControls !== false ? (
+            '<div class="map-controls">' +
+              '<button type="button" class="map-ctrl-btn" data-action="map-zoom" data-map-id="' + esc(mapId) + '" data-delta="0.35" aria-label="확대">' + svgIcon('plus', 14) + '</button>' +
+              '<button type="button" class="map-ctrl-btn" data-action="map-zoom" data-map-id="' + esc(mapId) + '" data-delta="-0.35" aria-label="축소">' + svgIcon('minus', 14) + '</button>' +
+              '<button type="button" class="map-ctrl-btn" data-action="map-reset" data-map-id="' + esc(mapId) + '" aria-label="전체 보기">' + svgIcon('max', 14) + '</button>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+    }
+
+    function renderCourseCardVisual(course) {
+      const palettes = {
+        river: { bg: '#E6F0F3', accent: '#0284C7', hill: '#CBDDE4' },
+        lake: { bg: '#EAF2EE', accent: '#0D9488', hill: '#D2E5DE' },
+        park: { bg: '#EDF3EA', accent: '#16A34A', hill: '#D6E4D1' },
+        track: { bg: '#FDF0EB', accent: '#EA580C', hill: '#F5D6CA' },
+        forest: { bg: '#EAF1E8', accent: '#15803D', hill: '#CFE0CC' },
+        ocean: { bg: '#E5EFF8', accent: '#2563EB', hill: '#C9DDF0' },
+        mountain: { bg: '#EFF1EF', accent: '#EA580C', hill: '#D5DBD7' }
+      };
+      const pal = palettes[course.theme] || palettes.river;
+      const pts = course.route;
+      const lats = pts.map((p) => p.lat), lngs = pts.map((p) => p.lng);
+      const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+      const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+      const midLat = (minLat + maxLat) / 2, midLng = (minLng + maxLng) / 2;
+      const lngScale = Math.cos((midLat * Math.PI) / 180);
+      const spanX = Math.max(0.002, (maxLng - minLng) * lngScale);
+      const spanY = Math.max(0.002, maxLat - minLat);
+      const scale = Math.min(220 / spanX, 110 / spanY);
+      const poly = pts.map((p) => {
+        const x = 160 + (p.lng - midLng) * lngScale * scale;
+        const y = 90 - (p.lat - midLat) * scale;
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      const start = poly.split(' ')[0].split(',');
+      return '' +
+        '<svg viewBox="0 0 320 180" style="width:100%;height:100%;display:block;" aria-hidden="true">' +
+          '<rect width="320" height="180" fill="' + pal.bg + '"/>' +
+          '<path d="M 0 140 Q 90 110 180 132 T 320 118 L 320 180 L 0 180 Z" fill="' + pal.hill + '"/>' +
+          '<polyline fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" points="' + poly + '"/>' +
+          '<polyline fill="none" stroke="' + pal.accent + '" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="' + poly + '"/>' +
+          '<circle cx="' + start[0] + '" cy="' + start[1] + '" r="5" fill="#16A34A" stroke="#FFFFFF" stroke-width="2"/>' +
+        '</svg>';
+    }
+
+    // Weather Logic
+    function describeWmoCode(code) {
+      if (code === 0 || code === 1) return { label: '맑음', isRain: false, isSnow: false, kind: 'sun' };
+      if (code === 2 || code === 3) return { label: '구름 많음', isRain: false, isSnow: false, kind: 'cloud' };
+      if (code === 45 || code === 48) return { label: '안개', isRain: false, isSnow: false, kind: 'cloud' };
+      if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return { label: '비', isRain: true, isSnow: false, kind: 'rain' };
+      if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { label: '눈', isRain: false, isSnow: true, kind: 'snow' };
+      if (code >= 95) return { label: '뇌우', isRain: true, isSnow: false, kind: 'storm' };
+      return { label: '흐림', isRain: false, isSnow: false, kind: 'cloud' };
+    }
+
+    function computeWeatherRecommendation(w) {
+      const feel = w.apparentTemperature, humidity = w.humidity, wind = w.windSpeedMs, precip = w.precipitationMm;
+      const cond = describeWmoCode(w.weatherCode);
+      const wet = cond.isRain || cond.isSnow || precip > 0.2;
+      const windy = wind >= 5.5;
+      let top = '', bottom = '', accessories = '';
+
+      if (feel >= 24) {
+        top = '초경량 싱글렛 또는 메쉬 반팔'; bottom = '통기성 러닝 쇼츠 (3~5인치)'; accessories = '통풍 러닝 캡 · 선글라스 · 자외선 차단제';
+      } else if (feel >= 17) {
+        top = '흡한속건 기능성 반팔 티셔츠'; bottom = '러닝 쇼츠 또는 가벼운 하프 타이츠'; accessories = '러닝 양말 · 햇빛 강할 시 경량 모자';
+      } else if (feel >= 10) {
+        top = '얇은 긴팔 기능성 톱 (또는 반팔 + 암워머)'; bottom = '쇼츠 또는 7부·하프 타이츠'; accessories = windy ? '초경량 방풍 베스트 지참 권장' : '가벼운 스포츠 선글라스';
+      } else if (feel >= 4) {
+        top = '보온 긴팔 베이스레이어 + 경량 윈드브레이커'; bottom = '러닝 롱 타이츠 또는 기모 쇼츠 레깅스'; accessories = '얇은 러닝 장갑 · 넥워머 (초반 체온 유지)';
+      } else {
+        top = '기모 베이스레이어 + 방풍 보온 러닝 재킷'; bottom = '기모 방풍 롱 타이츠'; accessories = '방한 장갑 · 비니 또는 이어워머 · 발목 보온 양말';
+      }
+      if (wet) accessories = '발수 챙 모자(우천 시야 확보) · ' + accessories;
+
+      let intensityTitle = '', intensityBadge = '', paceAdjustment = '', advice = '';
+      if (cond.kind === 'storm') {
+        intensityTitle = '실내 트레드밀 · 보강 운동 전환 권장'; intensityBadge = '기상 주의'; paceAdjustment = '실외 주행 자제';
+        advice = '뇌우·강우 상황에서는 낙뢰 및 미끄럼 위험이 높으므로 실내 러닝이나 하체 코어 보강을 권장합니다.';
+      } else if (wet) {
+        intensityTitle = '이지 런 (Zone 2) · 케이던스 위주 주행'; intensityBadge = '노면 주의'; paceAdjustment = '+10~15초/km 여유';
+        advice = '젖은 노면에서는 보폭을 줄이고 착지 안정성을 우선하세요. 급격한 코너링이나 인터벌 질주는 피하는 편이 안전합니다.';
+      } else if (feel >= 27 || (feel >= 23 && humidity >= 78)) {
+        intensityTitle = '저강도 회복 조깅 (Zone 1–2)'; intensityBadge = '고온·고습'; paceAdjustment = '+25~35초/km 완화';
+        advice = '체온 상승과 탈수 속도가 빠릅니다. 15~20분마다 수분·전해질을 보충하고 새벽이나 해 진 뒤 주행을 권장합니다.';
+      } else if (feel >= 21) {
+        intensityTitle = '유산소 이지 런 · 스테디 런'; intensityBadge = '더위 보정'; paceAdjustment = '+10~20초/km 완화';
+        advice = '심박수가 평소보다 5~10bpm 높게 올라갈 수 있으니 목표 페이스보다 심박 존(Zone 2~3) 기준으로 강도를 조절하세요.';
+      } else if (feel >= 8 && feel < 18 && !windy) {
+        intensityTitle = '템포 런 · 인터벌 · PR 도전 최적'; intensityBadge = '최적 컨디션'; paceAdjustment = '목표 페이스 100% 수행';
+        advice = '열 발산과 산소 효율이 가장 좋은 러닝 골든 기온입니다. 역치 템포나 트랙 인터벌 같은 고강도 세션에 적합합니다.';
+      } else if (feel >= 1) {
+        intensityTitle = '스테디 · 템포 런 (충분한 워밍업 필수)'; intensityBadge = '선선·쌀쌀'; paceAdjustment = windy ? '맞바람 구간 +10초/km' : '목표 페이스 유지 가능';
+        advice = '관절과 아킬레스건이 굳어 있을 수 있으므로 본 주행 전 10분간 동적 스트레칭과 가벼운 조깅으로 체온을 올리세요.';
+      } else {
+        intensityTitle = '유산소 이지 런 (Zone 2) 또는 실내 주행'; intensityBadge = '한파 주의'; paceAdjustment = '+15~20초/km 완화';
+        advice = '차가운 공기로 기관지가 자극될 수 있어 고강도 인터벌(Zone 5)은 피하고, 코 호흡·넥워머를 활용해 일정한 리듬으로 달리세요.';
+      }
+      return { cond, top, bottom, accessories, intensityTitle, intensityBadge, paceAdjustment, advice };
+    }
+
+    async function fetchWeather(lat, lng, label) {
+      state.weatherLoading = true;
+      render();
+      try {
+        const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(4) + '&longitude=' + lng.toFixed(4) +
+          '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability&wind_speed_unit=ms&timezone=Asia%2FSeoul&forecast_days=1';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const cur = data.current;
+        const nowH = new Date().getHours();
+        const times = (data.hourly && data.hourly.time) || [];
+        const temps = (data.hourly && data.hourly.temperature_2m) || [];
+        const probs = (data.hourly && data.hourly.precipitation_probability) || [];
+        const nextH = [];
+        for (let i = 0; i < times.length && nextH.length < 4; i++) {
+          const hp = parseInt(times[i].slice(11, 13), 10);
+          if (hp >= nowH) nextH.push({ timeLabel: String(hp).padStart(2, '0') + '시', temp: Math.round(temps[i] ?? cur.temperature_2m), precipProb: Math.round(probs[i] ?? 0) });
+        }
+        state.weather = {
+          locationLabel: label, lat, lng,
+          temperature: Number(cur.temperature_2m.toFixed(1)),
+          apparentTemperature: Number(cur.apparent_temperature.toFixed(1)),
+          humidity: Math.round(cur.relative_humidity_2m),
+          windSpeedMs: Number(cur.wind_speed_10m.toFixed(1)),
+          precipitationMm: Number((cur.precipitation ?? 0).toFixed(1)),
+          weatherCode: Number(cur.weather_code ?? 0),
+          hourlyNext: nextH
+        };
+      } catch (e) {
+        state.weather = {
+          locationLabel: label + ' (기본 기준)', lat, lng,
+          temperature: 12.4, apparentTemperature: 10.8, humidity: 52, windSpeedMs: 2.8, precipitationMm: 0, weatherCode: 1,
+          hourlyNext: [
+            { timeLabel: '지금', temp: 12, precipProb: 10 },
+            { timeLabel: '+1h', temp: 11, precipProb: 10 },
+            { timeLabel: '+2h', temp: 10, precipProb: 15 },
+            { timeLabel: '+3h', temp: 9, precipProb: 15 }
+          ]
+        };
+      } finally {
+        state.weatherLoading = false;
+        render();
+      }
+    }
+
+    function loadWeatherByGeo() {
+      state.weatherCityId = 'auto';
+      state.weatherGeoMsg = '';
+      if (!('geolocation' in navigator)) {
+        state.weatherGeoMsg = '브라우저 위치 지원 불가 · 서울 기준 날씨 표시';
+        fetchWeather(CITY_PRESETS[0].lat, CITY_PRESETS[0].lng, '서울 (기본 위치)');
+        return;
+      }
+      state.weatherLoading = true;
+      render();
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.weatherGeoMsg = '현재 GPS 위치 기반 실시간 날씨';
+          fetchWeather(pos.coords.latitude, pos.coords.longitude, '현재 내 위치');
+        },
+        () => {
+          state.weatherGeoMsg = '위치 권한 미허용 · 서울 기준 날씨 표시';
+          fetchWeather(CITY_PRESETS[0].lat, CITY_PRESETS[0].lng, '서울 (기본 위치)');
+        },
+        { timeout: 5000, maximumAge: 300000 }
+      );
+    }
+
+    function renderWeatherWidget() {
+      const w = state.weather;
+      const rec = w ? computeWeatherRecommendation(w) : null;
+      const cityBtns = CITY_PRESETS.map((c) =>
+        '<button type="button" class="seg-btn ' + (state.weatherCityId === c.id ? 'active' : '') + '" data-action="weather-city" data-city="' + c.id + '">' + c.label + '</button>'
+      ).join('');
+
+      let bodyHtml = '<div class="grid-3"><div class="sub-box" style="height:140px;background:#F1F5F9;"></div><div class="sub-box" style="height:140px;background:#F1F5F9;"></div><div class="sub-box" style="height:140px;background:#F1F5F9;"></div></div>';
+      if (w && rec) {
+        const iconColor = rec.cond.kind === 'sun' ? '#F59E0B' : rec.cond.kind === 'rain' ? '#0284C7' : rec.cond.kind === 'storm' ? '#D97706' : '#64748B';
+        const hourlyHtml = w.hourlyNext.length > 0 ? (
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding-top:10px;border-top:1px solid #E2E8F0;text-align:center;font-size:11px;">' +
+          w.hourlyNext.map((h) =>
+            '<div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:6px 4px;">' +
+              '<div class="muted font-mono-tab">' + h.timeLabel + '</div>' +
+              '<div class="font-mono-tab bold" style="margin-top:2px;">' + h.temp + '°</div>' +
+              '<div class="font-mono-tab" style="font-size:10px;color:#0284C7;">' + h.precipProb + '%</div>' +
+            '</div>'
+          ).join('') + '</div>'
+        ) : '';
+
+        bodyHtml =
+          '<div class="grid-12 items-stretch">' +
+            '<div class="lg-span-4 sub-box flex flex-col justify-between gap-3">' +
+              '<div class="flex items-start justify-between gap-3">' +
+                '<div>' +
+                  '<div class="text-xs muted">' + esc(w.locationLabel) + ' · ' + rec.cond.label + '</div>' +
+                  '<div class="flex items-center gap-2" style="margin-top:4px;align-items:baseline;">' +
+                    '<span class="font-display bold tabular-nums" style="font-size:28px;">' + w.temperature + '°C</span>' +
+                    '<span class="text-xs font-mono-tab muted">체감 ' + w.apparentTemperature + '°C</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div style="padding:8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;color:' + iconColor + ';">' + svgIcon(rec.cond.kind, 24) + '</div>' +
+              '</div>' +
+              '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px;padding-top:10px;border-top:1px solid #E2E8F0;">' +
+                '<div class="flex items-center gap-1"><span style="color:#0284C7;">' + svgIcon('droplet', 14) + '</span><span class="font-mono-tab">습도 ' + w.humidity + '%</span></div>' +
+                '<div class="flex items-center gap-1"><span class="muted">' + svgIcon('wind', 14) + '</span><span class="font-mono-tab">' + w.windSpeedMs + ' m/s</span></div>' +
+                '<div class="text-right font-mono-tab">강수 ' + w.precipitationMm + 'mm</div>' +
+              '</div>' +
+              hourlyHtml +
+            '</div>' +
+
+            '<div class="lg-span-4 flex flex-col justify-between gap-2" style="padding:4px 0;">' +
+              '<div>' +
+                '<div class="text-xs semi muted">체감 온도 기반 추천 복장</div>' +
+                '<div class="text-sm bold" style="margin-top:2px;">주행 10분 후 열감(+8°C)을 고려한 레이어링</div>' +
+              '</div>' +
+              '<div class="divider-y text-xs">' +
+                '<div class="flex justify-between gap-3" style="padding:8px 0;"><span class="muted">상의</span><span class="semi text-right">' + esc(rec.top) + '</span></div>' +
+                '<div class="flex justify-between gap-3" style="padding:8px 0;"><span class="muted">하의</span><span class="semi text-right">' + esc(rec.bottom) + '</span></div>' +
+                '<div class="flex justify-between gap-3" style="padding:8px 0;"><span class="muted">장비·보온</span><span class="text-right" style="color:#334155;">' + esc(rec.accessories) + '</span></div>' +
+              '</div>' +
+              '<div class="font-mono-tab" style="font-size:11px;color:#94A3B8;">좌표 ' + w.lat.toFixed(2) + '°N, ' + w.lng.toFixed(2) + '°E</div>' +
+            '</div>' +
+
+            '<div class="lg-span-4 sub-box flex flex-col justify-between gap-3">' +
+              '<div class="stack-sm">' +
+                '<div class="flex items-center justify-between text-xs">' +
+                  '<span class="semi accent">' + esc(rec.intensityBadge) + '</span>' +
+                  '<span class="font-mono-tab semi">' + esc(rec.paceAdjustment) + '</span>' +
+                '</div>' +
+                '<div class="text-sm bold">' + esc(rec.intensityTitle) + '</div>' +
+                '<p class="text-xs" style="color:#475569;line-height:1.55;margin:0;">' + esc(rec.advice) + '</p>' +
+              '</div>' +
+              '<button type="button" class="btn-primary" style="width:100%;" data-action="nav" data-tab="live">추천 강도로 라이브 러닝 시작</button>' +
+            '</div>' +
+          '</div>';
+      }
+
+      return '' +
+        '<section class="card stack-md">' +
+          '<div class="flex flex-wrap items-center justify-between gap-3" style="padding-bottom:14px;border-bottom:1px solid #F1F5F9;">' +
+            '<div>' +
+              '<h2 class="text-base bold" style="margin:0;">위치 기반 러닝 날씨 · 복장 및 강도 가이드</h2>' +
+              '<p class="text-xs muted" style="margin:4px 0 0;">' + esc(state.weatherGeoMsg || '현재 기온, 체감온도, 습도, 바람을 반영해 최적의 러닝 복장과 훈련 강도를 추천합니다.') + '</p>' +
+            '</div>' +
+            '<div class="flex flex-wrap items-center gap-2">' +
+              '<div class="seg-group">' +
+                '<button type="button" class="seg-btn ' + (state.weatherCityId === 'auto' ? 'active' : '') + '" data-action="weather-geo">' + svgIcon('locate', 13) + '내 위치</button>' +
+                cityBtns +
+              '</div>' +
+              '<button type="button" class="btn-soft btn-sm" data-action="weather-refresh" aria-label="날씨 새로고침">' + svgIcon('refresh', 14) + '</button>' +
+            '</div>' +
+          '</div>' +
+          bodyHtml +
+        '</section>';
+    }
+
+    function renderDashboard() {
+      const weekStart = getStartOfWeekIso(REFERENCE_DATE);
+      const weekEnd = addDaysIso(weekStart, 6);
+      const monthPrefix = REFERENCE_DATE.slice(0, 7);
+      const weekRuns = state.runs.filter((r) => r.date >= weekStart && r.date <= weekEnd);
+      const monthRuns = state.runs.filter((r) => r.date.startsWith(monthPrefix));
+      const weekKm = weekRuns.reduce((a, r) => a + r.distanceKm, 0);
+      const weekSec = weekRuns.reduce((a, r) => a + r.durationSec, 0);
+      const weekElev = weekRuns.reduce((a, r) => a + r.elevationGainM, 0);
+      const monthKm = monthRuns.reduce((a, r) => a + r.distanceKm, 0);
+      const avgPace = weekKm > 0 ? Math.round(weekSec / weekKm) : 0;
+      const pct = Math.min(100, Math.round((weekKm / Math.max(1, state.weeklyGoalKm)) * 100));
+
+      const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];
+      const daily = dayLabels.map((lbl, idx) => {
+        const dStr = addDaysIso(weekStart, idx);
+        const km = weekRuns.filter((r) => r.date === dStr).reduce((a, r) => a + r.distanceKm, 0);
+        return { label: lbl, dateStr: dStr, km: Number(km.toFixed(1)) };
+      });
+      const maxDay = Math.max(10, ...daily.map((d) => d.km));
+      const nextSess = state.plan && state.plan.weeks[0] ? state.plan.weeks[0].sessions.find((s) => s.workoutType !== 'rest') : null;
+
+      // Latest route silhouette for editorial dark anchor
+      const heroPts = (state.runs[0] && state.runs[0].route && state.runs[0].route.length > 1) ? state.runs[0].route : ROUTES.han;
+      const hLats = heroPts.map((p) => p.lat), hLngs = heroPts.map((p) => p.lng);
+      const hMinLat = Math.min(...hLats), hMaxLat = Math.max(...hLats), hMinLng = Math.min(...hLngs), hMaxLng = Math.max(...hLngs);
+      const hMidLat = (hMinLat + hMaxLat) / 2, hMidLng = (hMinLng + hMaxLng) / 2;
+      const hScale = Math.min(340 / Math.max(0.002, (hMaxLng - hMinLng) * Math.cos((hMidLat * Math.PI) / 180)), 180 / Math.max(0.002, hMaxLat - hMinLat));
+      const heroPoly = heroPts.map((p) => (220 + (p.lng - hMidLng) * Math.cos((hMidLat * Math.PI) / 180) * hScale).toFixed(1) + ',' + (120 - (p.lat - hMidLat) * hScale).toFixed(1)).join(' ');
+
+      const barsHtml = daily.map((d, idx) => {
+        const hPct = d.km > 0 ? Math.max(14, (d.km / maxDay) * 100) : 6;
+        const sel = state.selectedDayIdx === idx;
+        const barColor = d.km === 0 ? '#F1F5F9' : sel ? '#0F172A' : '#EA580C';
+        return '' +
+          '<button type="button" data-action="select-day" data-idx="' + idx + '" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:128px;gap:6px;">' +
+            '<span class="font-mono-tab muted" style="font-size:11px;">' + (d.km > 0 ? d.km : '') + '</span>' +
+            '<div style="width:100%;max-width:36px;flex:1;display:flex;align-items:end;"><div style="width:100%;height:' + hPct + '%;background:' + barColor + ';border-radius:6px 6px 0 0;"></div></div>' +
+            '<span class="text-xs ' + (sel ? 'bold' : 'muted') + '">' + d.label + '</span>' +
+          '</button>';
+      }).join('');
+
+      const recentHtml = state.runs.slice(0, 5).map((run) =>
+        '<div class="flex items-center justify-between gap-3" style="padding:12px 0;">' +
+          '<button type="button" data-action="open-run" data-id="' + esc(run.id) + '" class="flex-1" style="text-align:left;">' +
+            '<div class="flex items-center gap-2 text-xs muted">' +
+              '<span class="semi" style="color:#334155;">' + WORKOUT_TYPE_LABELS[run.workoutType] + '</span>' +
+              '<span>·</span><span class="font-mono-tab">' + esc(run.date) + '</span>' +
+              (run.courseName ? '<span>·</span><span class="truncate">' + esc(run.courseName) + '</span>' : '') +
+            '</div>' +
+            '<div class="semi truncate" style="margin-top:2px;font-size:14px;">' + esc(run.title) + '</div>' +
+          '</button>' +
+          '<div class="flex items-center gap-3 shrink-0">' +
+            '<div class="text-right">' +
+              '<div class="font-mono-tab text-sm bold">' + run.distanceKm.toFixed(1) + ' km</div>' +
+              '<div class="font-mono-tab text-xs muted">' + formatPace(run.avgPaceSecPerKm) + '/km</div>' +
+            '</div>' +
+            '<button type="button" class="btn-soft btn-sm" data-action="share-run-quick" data-id="' + esc(run.id) + '" aria-label="커뮤니티 공유">' + svgIcon('share', 14) + '</button>' +
+          '</div>' +
+        '</div>'
+      ).join('');
+
+      const shoesHtml = state.shoes.map((sh) => {
+        const spct = Math.min(100, Math.round((sh.distanceKm / sh.maxKm) * 100));
+        const warn = spct >= 80;
+        return '' +
+          '<div style="padding:10px 0;" class="stack-sm">' +
+            '<div class="flex items-center justify-between gap-2">' +
+              '<div class="flex-1">' +
+                '<div class="text-sm semi truncate">' + esc(sh.brand) + ' ' + esc(sh.model) + '</div>' +
+                '<div class="text-xs muted font-mono-tab">' + sh.distanceKm.toFixed(1) + ' / ' + sh.maxKm + ' km (' + spct + '%)' +
+                  (warn ? ' <span style="color:#B45309;font-weight:600;">· 쿠션 점검 권장</span>' : '') +
+                '</div>' +
+              '</div>' +
+              '<div class="flex items-center gap-1 shrink-0">' +
+                '<button type="button" class="' + (sh.isPrimary ? 'btn-primary btn-sm' : 'btn-soft btn-sm') + '" data-action="primary-shoe" data-id="' + esc(sh.id) + '">' + (sh.isPrimary ? '주력화' : '주력 지정') + '</button>' +
+                '<button type="button" class="btn-soft btn-sm" data-action="delete-shoe" data-id="' + esc(sh.id) + '" aria-label="삭제">' + svgIcon('trash', 13) + '</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="progress-track" style="height:6px;"><div class="progress-fill" style="width:' + spct + '%;background:' + (warn ? '#D97706' : '#1E293B') + ';"></div></div>' +
+          '</div>';
+      }).join('');
+
+      return '' +
+        '<div class="stack-lg">' +
+          '<section class="grid-12 items-stretch">' +
+            '<div class="lg-span-7 card flex flex-col justify-between gap-4">' +
+              '<div class="stack-sm">' +
+                '<div class="flex flex-wrap items-center justify-between gap-2">' +
+                  '<div class="text-xs muted">이번 주 훈련 볼륨 · ' + weekStart.slice(5) + ' ~ ' + weekEnd.slice(5) + '</div>' +
+                  (state.editingGoal
+                    ? '<div class="flex items-center gap-2"><input id="goal-input" type="number" min="5" max="300" value="' + esc(state.goalInput) + '" class="input font-mono-tab" style="width:78px;padding:4px 8px;" /><span class="text-xs muted">km</span><button type="button" class="btn-primary btn-sm" data-action="save-goal">확인</button></div>'
+                    : '<button type="button" class="text-xs semi muted flex items-center gap-1" data-action="edit-goal">' + svgIcon('edit', 13) + ' 주간 목표 ' + state.weeklyGoalKm + 'km 수정</button>') +
+                '</div>' +
+                '<div class="flex flex-wrap items-center justify-between gap-3" style="align-items:baseline;">' +
+                  '<h1 class="font-display bold tabular-nums text-balance" style="margin:0;font-size:clamp(2rem,3.6vw,3rem);">' + weekKm.toFixed(1) + ' <span style="font-size:20px;font-weight:500;color:#94A3B8;">/ ' + state.weeklyGoalKm.toFixed(1) + ' km</span></h1>' +
+                  '<span class="font-mono-tab text-sm semi accent">목표 ' + pct + '% 달성</span>' +
+                '</div>' +
+                '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+              '</div>' +
+
+              '<div style="padding-top:12px;border-top:1px solid #F1F5F9;">' +
+                '<div class="flex items-center justify-between text-xs muted"><span>요일별 주행 거리 (막대를 클릭해 세부 기록 확인)</span>' +
+                  (state.selectedDayIdx !== null ? '<span class="font-mono-tab semi" style="color:#0F172A;">' + daily[state.selectedDayIdx].dateStr + ': ' + daily[state.selectedDayIdx].km + ' km</span>' : '') +
+                '</div>' +
+                '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding-top:10px;">' + barsHtml + '</div>' +
+              '</div>' +
+
+              '<div class="flex flex-wrap items-center justify-between gap-3" style="padding-top:12px;border-top:1px solid #F1F5F9;">' +
+                '<div class="text-xs muted">' + (nextSess ? '추천 다음 훈련: <strong style="color:#0F172A;">' + esc(nextSess.title) + '</strong> (' + esc(nextSess.targetPaceRange) + ')' : 'GPS 또는 코스 시뮬레이터로 바로 러닝을 기록해 보세요.') + '</div>' +
+                '<button type="button" class="btn-accent" data-action="nav" data-tab="live">' + svgIcon('play', 14) + '라이브 러닝 시작</button>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="lg-span-5 hero-dark">' +
+              '<svg viewBox="0 0 440 260" class="hero-dark-bg" preserveAspectRatio="xMidYMid slice">' +
+                '<defs><pattern id="hgrid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="#1E293B" stroke-width="1"/></pattern></defs>' +
+                '<rect width="440" height="260" fill="url(#hgrid)"/>' +
+                '<circle cx="340" cy="60" r="120" fill="#EA580C" opacity="0.14"/>' +
+                '<polyline fill="none" stroke="#EA580C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="' + heroPoly + '" opacity="0.9"/>' +
+              '</svg>' +
+              '<div class="hero-dark-body stack-sm">' +
+                '<div class="text-xs" style="color:#CBD5E1;">' + monthPrefix.replace('-', '년 ') + '월 트레이닝 요약</div>' +
+                '<h2 class="font-display text-balance" style="margin:0;font-size:24px;line-height:1.3;">꾸준한 리듬이 다음 레이스의 페이스를 만듭니다</h2>' +
+                '<div class="flex flex-wrap items-center gap-3 text-xs" style="color:#E2E8F0;">' +
+                  '<span class="font-mono-tab">월간 누적 ' + monthKm.toFixed(1) + ' km</span><span>·</span>' +
+                  '<span class="font-mono-tab">총 ' + monthRuns.length + '회 러닝</span><span>·</span>' +
+                  '<button type="button" class="semi" style="color:#FB923C;" data-action="nav" data-tab="plan">맞춤 훈련표 보기 →</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+
+          '<section class="grid-kpi">' +
+            '<div class="card-tight"><div class="text-xs muted">이번 주 러닝 횟수</div><div class="font-display bold tabular-nums" style="font-size:24px;margin-top:4px;">' + weekRuns.length + '회</div><div class="text-xs muted font-mono-tab" style="margin-top:4px;">주간 ' + weekKm.toFixed(1) + ' km 완료</div></div>' +
+            '<div class="card-tight"><div class="text-xs muted">이번 주 평균 페이스</div><div class="font-mono-tab bold" style="font-size:24px;margin-top:4px;">' + (avgPace > 0 ? formatPace(avgPace) : "-'--\"") + '<span class="text-sm muted" style="font-weight:400;">/km</span></div><div class="text-xs muted" style="margin-top:4px;">주간 전체 활동 기준</div></div>' +
+            '<div class="card-tight"><div class="text-xs muted">이번 주 총 운동 시간</div><div class="font-display bold tabular-nums" style="font-size:24px;margin-top:4px;">' + formatDurationKorean(weekSec) + '</div><div class="text-xs muted font-mono-tab" style="margin-top:4px;">누적 상승 고도 +' + weekElev + ' m</div></div>' +
+            '<div class="card-tight"><div class="text-xs muted">이번 달 누적 거리</div><div class="font-display bold tabular-nums" style="font-size:24px;margin-top:4px;">' + monthKm.toFixed(1) + ' <span class="text-sm muted" style="font-weight:400;">km</span></div><div class="text-xs" style="margin-top:4px;"><button type="button" class="accent semi" data-action="nav" data-tab="analytics">주간·월간 추이 분석 →</button></div></div>' +
+          '</section>' +
+
+          renderWeatherWidget() +
+
+          '<section class="grid-12">' +
+            '<div class="lg-span-7 card stack-sm">' +
+              '<div class="flex items-center justify-between"><h2 class="text-base bold" style="margin:0;">최근 러닝 기록</h2><button type="button" class="text-xs semi accent" data-action="nav" data-tab="analytics">전체 일지 보기</button></div>' +
+              (state.runs.length === 0 ? '<div class="muted text-sm" style="padding:36px 0;text-align:center;">아직 기록된 러닝이 없습니다.</div>' : '<div class="divider-y">' + recentHtml + '</div>') +
+            '</div>' +
+            '<div class="lg-span-5 card stack-sm">' +
+              '<div class="flex items-center justify-between"><div><h2 class="text-base bold" style="margin:0;">러닝화 마일리지 관리</h2><p class="text-xs muted" style="margin:2px 0 0;">기록 저장 시 주행 거리가 자동 합산됩니다</p></div><button type="button" class="btn-soft btn-sm" data-action="toggle-add-shoe">' + svgIcon('plus', 13) + '추가</button></div>' +
+              (state.showAddShoe ? (
+                '<form id="add-shoe-form" class="sub-box stack-sm">' +
+                  '<div class="grid-2"><input id="shoe-brand" class="input" placeholder="브랜드 (예: HOKA)" required /><input id="shoe-model" class="input" placeholder="모델명 (예: Clifton 9)" required /></div>' +
+                  '<div class="flex items-center justify-between gap-2"><div class="flex items-center gap-2 text-xs muted"><span>교체 주기</span><input id="shoe-max" type="number" min="200" max="1500" value="600" class="input font-mono-tab" style="width:76px;padding:4px 8px;" /><span>km</span></div><button type="submit" class="btn-primary btn-sm">등록</button></div>' +
+                '</form>'
+              ) : '') +
+              '<div class="divider-y">' + shoesHtml + '</div>' +
+            '</div>' +
+          '</section>' +
+        '</div>';
+    }
+
+    function renderLiveRun() {
+      const course = COURSE_PRESETS.find((c) => c.id === state.liveCourseId) || COURSE_PRESETS[0];
+      const activeShoes = state.shoes.filter((s) => !s.retired);
+      const avgPace = state.liveDistKm > 0.02 ? Math.round(state.liveElapsedSec / state.liveDistKm) : 0;
+      const mapPoints = state.liveRoute.length > 0 ? state.liveRoute : (state.liveMode === 'sim' ? course.route : []);
+
+      return '' +
+        '<div class="stack-md">' +
+          '<div class="card flex flex-wrap items-center justify-between gap-4">' +
+            '<div>' +
+              '<h1 class="text-xl bold" style="margin:0;">라이브 GPS 러닝 트래커</h1>' +
+              '<p class="text-xs muted" style="margin:4px 0 0;">실제 GPS 위치 추적 또는 8개 추천 코스 시뮬레이션으로 거리, 시간, 페이스 및 경로를 실시간 기록합니다.</p>' +
+            '</div>' +
+            '<div class="seg-group">' +
+              '<button type="button" class="seg-btn ' + (state.liveMode === 'gps' ? 'active' : '') + '" data-action="live-mode" data-mode="gps" ' + (state.liveStatus === 'running' ? 'disabled' : '') + '>' + svgIcon('nav', 13) + '실시간 GPS 추적</button>' +
+              '<button type="button" class="seg-btn ' + (state.liveMode === 'sim' ? 'active' : '') + '" data-action="live-mode" data-mode="sim" ' + (state.liveStatus === 'running' ? 'disabled' : '') + '>코스 시뮬레이션 (데모)</button>' +
+            '</div>' +
+          '</div>' +
+
+          (state.liveGpsNotice ? '<div style="background:#0F172A;color:#F1F5F9;padding:12px 16px;border-radius:12px;font-size:12px;">' + esc(state.liveGpsNotice) + '</div>' : '') +
+
+          '<div class="grid-12 items-stretch">' +
+            '<div class="lg-span-5 card flex flex-col justify-between gap-4">' +
+              '<div style="text-align:center;padding:12px 0;border-bottom:1px solid #F1F5F9;">' +
+                '<div class="text-xs muted">경과 시간</div>' +
+                '<div id="live-elapsed" class="font-mono-tab bold" style="font-size:48px;letter-spacing:-0.03em;margin-top:4px;">' + formatDuration(state.liveElapsedSec) + '</div>' +
+              '</div>' +
+
+              '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">' +
+                '<div class="sub-box"><div class="text-xs muted">거리</div><div id="live-dist" class="font-mono-tab text-lg bold" style="margin-top:4px;">' + state.liveDistKm.toFixed(2) + '<span class="text-xs muted" style="font-weight:400;"> km</span></div></div>' +
+                '<div class="sub-box"><div class="text-xs muted">현재 페이스</div><div id="live-pace" class="font-mono-tab text-lg bold accent" style="margin-top:4px;">' + formatPace(state.liveCurrentPaceSec) + '</div></div>' +
+                '<div class="sub-box"><div class="text-xs muted">평균 페이스</div><div id="live-avg-pace" class="font-mono-tab text-lg bold" style="margin-top:4px;">' + formatPace(avgPace) + '</div></div>' +
+              '</div>' +
+
+              (state.liveMode === 'sim' ? (
+                '<div class="sub-box stack-sm text-xs">' +
+                  '<div class="flex items-center justify-between gap-2"><span class="semi">시뮬레이션 코스</span><select id="sim-course-select" class="select" style="max-width:210px;padding:5px 8px;" ' + (state.liveStatus === 'running' ? 'disabled' : '') + '>' +
+                    COURSE_PRESETS.map((c) => '<option value="' + c.id + '"' + (c.id === state.liveCourseId ? ' selected' : '') + '>' + esc(c.name) + ' (' + c.distanceKm + 'km)</option>').join('') +
+                  '</select></div>' +
+                  '<div><div class="flex justify-between"><span class="semi">목표 주행 페이스</span><span id="sim-pace-lbl" class="font-mono-tab bold accent">' + formatPace(state.simTargetPaceSec) + '/km</span></div>' +
+                    '<input id="sim-pace-range" type="range" min="210" max="450" step="5" value="' + state.simTargetPaceSec + '" style="width:100%;accent-color:#EA580C;margin-top:4px;" /></div>' +
+                  '<div class="flex items-center justify-between"><span class="semi">시뮬레이션 배속</span><div class="flex gap-1">' +
+                    [1, 5, 20].map((m) => '<button type="button" class="' + (state.simSpeedMult === m ? 'btn-primary btn-sm' : 'btn-soft btn-sm') + ' font-mono-tab" data-action="sim-speed" data-mult="' + m + '">' + m + '×</button>').join('') +
+                  '</div></div>' +
+                '</div>'
+              ) : '') +
+
+              '<div class="grid-2">' +
+                '<input id="live-title" class="input" value="' + esc(state.liveTitle) + '" placeholder="활동 제목 (선택)" />' +
+                '<select id="live-type" class="select">' + Object.keys(WORKOUT_TYPE_LABELS).map((t) => '<option value="' + t + '"' + (t === state.liveWorkoutType ? ' selected' : '') + '>' + WORKOUT_TYPE_LABELS[t] + '</option>').join('') + '</select>' +
+              '</div>' +
+
+              '<div class="stack-sm">' +
+                '<div class="flex items-center justify-between gap-2 text-xs muted"><span>착용 러닝화</span><select id="live-shoe" class="select" style="width:auto;max-width:220px;padding:6px 10px;"><option value="">선택 안 함</option>' +
+                  activeShoes.map((s) => '<option value="' + s.id + '"' + (s.id === state.liveShoeId ? ' selected' : '') + '>' + esc(s.brand + ' ' + s.model) + '</option>').join('') +
+                  '<option value="__custom__"' + (state.liveShoeId === '__custom__' ? ' selected' : '') + '>직접 입력</option>' +
+                '</select></div>' +
+                '<input id="live-shoe-custom" class="input" value="' + esc(state.liveShoeCustom || '') + '" maxlength="120" placeholder="착용 러닝화 직접 입력 (예: 나이키 페가수스 41)" />' +
+              '</div>' +
+
+              '<div class="flex flex-wrap items-center gap-2">' +
+                (state.liveStatus !== 'running'
+                  ? '<button type="button" class="btn-accent flex-1" style="min-height:44px;" data-action="live-start">' + svgIcon('play', 14) + (state.liveStatus === 'paused' ? '계속 달리기' : '러닝 시작') + '</button>'
+                  : '<button type="button" class="btn-primary flex-1" style="min-height:44px;" data-action="live-pause">' + svgIcon('pause', 14) + '일시정지</button>') +
+                '<button type="button" class="btn-soft" style="min-height:44px;" data-action="live-lap" ' + (state.liveStatus === 'idle' ? 'disabled' : '') + '>' + svgIcon('flag', 14) + '랩 기록</button>' +
+                (state.liveElapsedSec >= 5 ? '<button type="button" class="btn-primary" style="min-height:44px;background:#16A34A;" data-action="live-save">' + svgIcon('save', 14) + '저장</button>' : '') +
+                (state.liveStatus !== 'idle' ? '<button type="button" class="btn-soft" style="min-height:44px;" data-action="live-reset" aria-label="초기화">' + svgIcon('reset', 14) + '</button>' : '') +
+              '</div>' +
+            '</div>' +
+
+            '<div class="lg-span-7 flex flex-col gap-4">' +
+              '<div class="card-tight stack-sm flex-1">' +
+                '<div class="flex items-center justify-between text-xs muted"><span class="semi" style="color:#0F172A;">실시간 경로 지도 · ' + (state.liveMode === 'gps' ? 'GPS 수신 모드' : esc(course.name)) + '</span><span class="font-mono-tab">좌표 ' + state.liveRoute.length + '개 기록됨</span></div>' +
+                '<div id="live-map-host">' + renderRouteMap('live-map', mapPoints, 310, true, state.liveStatus === 'running') + '</div>' +
+              '</div>' +
+              '<div class="card-tight">' +
+                '<div class="flex items-center justify-between" style="margin-bottom:8px;"><h2 class="text-sm bold" style="margin:0;">실시간 랩 · 구간 스플릿</h2><span class="text-xs muted font-mono-tab">' + state.liveLaps.length + ' Laps</span></div>' +
+                (state.liveLaps.length === 0
+                  ? '<p class="text-xs muted" style="margin:6px 0;">1km를 돌파하거나 "랩 기록" 버튼을 누르면 구간 페이스가 실시간으로 누적됩니다.</p>'
+                  : '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">' + state.liveLaps.map((l) =>
+                      '<div class="sub-box"><div class="font-mono-tab muted" style="font-size:11px;">Lap ' + l.km + ' (' + l.distanceKm + 'km)</div><div class="font-mono-tab text-sm bold" style="margin-top:2px;">' + formatPace(l.paceSecPerKm) + '/km</div></div>'
+                    ).join('') + '</div>') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function renderTrainingPlan() {
+      const plan = state.plan;
+      const activeWeek = plan.weeks.find((w) => w.weekNumber === state.planWeekNum) || plan.weeks[0];
+      const guide = LEVEL_GUIDELINES[plan.config.level];
+      const doneCnt = activeWeek.sessions.filter((s) => s.workoutType !== 'rest' && plan.completedSessions[activeWeek.weekNumber + '-' + s.dayIndex]).length;
+      const totalCnt = activeWeek.sessions.filter((s) => s.workoutType !== 'rest').length;
+
+      const weekTabs = plan.weeks.map((w) =>
+        '<button type="button" class="' + (state.planWeekNum === w.weekNumber ? 'btn-primary btn-sm' : 'btn-soft btn-sm') + '" data-action="plan-week" data-week="' + w.weekNumber + '">' + w.weekNumber + '주차 (' + w.totalKm + 'km)</button>'
+      ).join('');
+
+      const rows = activeWeek.sessions.map((s) => {
+        const done = Boolean(plan.completedSessions[activeWeek.weekNumber + '-' + s.dayIndex]);
+        const isRest = s.workoutType === 'rest';
+        const isRun = !isRest && s.workoutType !== 'strength';
+        const typeLbl = isRest ? '휴식' : s.workoutType === 'strength' ? '보강 운동' : WORKOUT_TYPE_LABELS[s.workoutType];
+        return '' +
+          '<div class="flex flex-wrap items-center justify-between gap-4" style="padding:14px 16px;background:' + (done ? '#ECFDF5' : '#FFFFFF') + ';">' +
+            '<div class="flex items-start gap-3 flex-1">' +
+              '<button type="button" ' + (isRest ? 'disabled' : '') + ' data-action="toggle-session" data-week="' + activeWeek.weekNumber + '" data-day="' + s.dayIndex + '" style="margin-top:2px;color:' + (isRest ? '#CBD5E1' : done ? '#16A34A' : '#94A3B8') + ';" aria-label="완료 체크">' +
+                svgIcon(done ? 'checkCircle' : 'circle', 20) +
+              '</button>' +
+              '<div class="flex-1">' +
+                '<div class="flex flex-wrap items-center gap-2 text-xs muted">' +
+                  '<span class="bold" style="color:#1E293B;">' + s.dayLabel + '</span><span>·</span>' +
+                  '<span class="semi accent">' + typeLbl + '</span><span>·</span>' +
+                  '<span class="font-mono-tab">' + s.targetHrZone + '</span><span>·</span>' +
+                  '<span class="font-mono-tab">' + s.rpeRange + '</span>' +
+                '</div>' +
+                '<div class="semi text-sm" style="margin-top:4px;' + (done ? 'text-decoration:line-through;color:#94A3B8;' : '') + '">' + esc(s.title) + '</div>' +
+                '<div class="text-xs muted" style="margin-top:3px;">' + esc(s.description) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex items-center gap-4 shrink-0">' +
+              '<div class="text-right">' +
+                '<div class="font-mono-tab text-sm bold">' + (s.targetDistanceKm > 0 ? s.targetDistanceKm + ' km' : '—') + '</div>' +
+                '<div class="font-mono-tab text-xs muted">' + esc(s.targetPaceRange) + '</div>' +
+              '</div>' +
+              (isRun ? '<button type="button" class="btn-soft btn-sm" data-action="quick-log-session" data-title="' + esc(s.title) + '" data-type="' + s.workoutType + '" data-dist="' + s.targetDistanceKm + '">' + svgIcon('plus', 13) + '기록하기</button>' : '') +
+            '</div>' +
+          '</div>';
+      }).join('');
+
+      return '' +
+        '<div class="stack-lg">' +
+          '<section class="card stack-md">' +
+            '<div class="flex flex-wrap items-start justify-between gap-3">' +
+              '<div><h1 class="text-xl bold" style="margin:0;">개인 맞춤형 러닝 훈련 계획 생성</h1><p class="text-xs muted" style="margin:4px 0 0;">목표 레이스와 현재 체력 수준(초급·중급·상급)을 입력하면 8주 주간 스케줄과 맞춤 강도 존을 자동 설계합니다.</p></div>' +
+              '<div class="text-xs muted font-mono-tab">활성 플랜: <strong style="color:#0F172A;">' + esc(plan.title) + '</strong></div>' +
+            '</div>' +
+            '<form id="plan-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end;">' +
+              '<div><label class="label">운동 목표</label><select id="plan-goal" class="select">' +
+                Object.keys(GOAL_LABELS).map((g) => '<option value="' + g + '"' + (g === plan.config.goal ? ' selected' : '') + '>' + GOAL_LABELS[g] + '</option>').join('') +
+              '</select></div>' +
+              '<div><label class="label">현재 체력 수준</label><select id="plan-level" class="select">' +
+                '<option value="beginner"' + (plan.config.level === 'beginner' ? ' selected' : '') + '>초보자 (주 0~15km 입문)</option>' +
+                '<option value="intermediate"' + (plan.config.level === 'intermediate' ? ' selected' : '') + '>중급자 (10K 완주 · 주 20~40km)</option>' +
+                '<option value="advanced"' + (plan.config.level === 'advanced' ? ' selected' : '') + '>상급자 (서브4/서브3 · 주 45km+)</option>' +
+              '</select></div>' +
+              '<div><label class="label">주간 훈련 일수</label><select id="plan-days" class="select">' +
+                [3, 4, 5, 6].map((d) => '<option value="' + d + '"' + (d === plan.config.daysPerWeek ? ' selected' : '') + '>주 ' + d + '일 훈련</option>').join('') +
+              '</select></div>' +
+              '<div><label class="label">현재 5K 기준 기록: <span id="plan-5k-val" class="font-mono-tab accent">' + plan.config.benchmark5kMinutes + '분</span></label>' +
+                '<input id="plan-5k" type="range" min="17" max="42" step="1" value="' + plan.config.benchmark5kMinutes + '" style="width:100%;accent-color:#EA580C;padding:8px 0;" /></div>' +
+              '<button type="submit" class="btn-accent" style="min-height:40px;">맞춤 계획 생성</button>' +
+            '</form>' +
+          '</section>' +
+
+          '<section class="card stack-md">' +
+            '<div class="flex flex-wrap items-center justify-between gap-4" style="padding-bottom:14px;border-bottom:1px solid #E2E8F0;">' +
+              '<div><div class="text-xs muted">' + esc(plan.summary) + '</div><h2 class="text-lg bold" style="margin:2px 0;">' + activeWeek.weekNumber + '주차 · ' + activeWeek.phaseName + '</h2><p class="text-xs muted" style="margin:0;">' + esc(activeWeek.focusSummary) + '</p></div>' +
+              '<div class="flex items-center gap-4 text-xs">' +
+                '<div><div class="muted">주간 목표 거리</div><div class="font-mono-tab text-base bold">' + activeWeek.totalKm + ' km</div></div>' +
+                '<span style="color:#E2E8F0;">|</span>' +
+                '<div><div class="muted">완료율</div><div class="font-mono-tab text-base bold accent">' + doneCnt + ' / ' + totalCnt + ' 세션</div></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex flex-wrap gap-2">' + weekTabs + '</div>' +
+            '<div class="table-wrap divider-y">' + rows + '</div>' +
+          '</section>' +
+
+          '<section class="grid-12">' +
+            '<div class="lg-span-7 card stack-sm">' +
+              '<div><h2 class="text-base bold" style="margin:0;">개인 맞춤 5단계 운동 강도 존 (Training Zones)</h2><p class="text-xs muted" style="margin:2px 0 0;">입력하신 5K 기록(' + plan.config.benchmark5kMinutes + '분) 기준으로 산출된 목표 페이스 및 주관적 운동 강도(RPE)입니다.</p></div>' +
+              '<div class="table-wrap"><table class="data-table"><thead><tr><th>강도 존</th><th>목표 페이스</th><th>심박 / RPE</th><th>호흡 · 대화 기준</th></tr></thead><tbody>' +
+                plan.zones.map((z) => '<tr><td><div class="bold">' + z.zone + '</div><div class="text-xs muted">' + z.name + '</div></td><td class="font-mono-tab semi accent">' + z.paceRange + '</td><td class="font-mono-tab"><div>' + z.hrPercent + '</div><div class="text-xs muted">' + z.rpe + '</div></td><td class="text-xs muted">' + z.talkTest + '</td></tr>').join('') +
+              '</tbody></table></div>' +
+            '</div>' +
+            '<div class="lg-span-5 card stack-sm">' +
+              '<div><div class="text-xs semi accent">' + LEVEL_LABELS[plan.config.level] + ' 맞춤형 가이드</div><h2 class="text-base bold" style="margin:4px 0 0;">' + guide.headline + '</h2></div>' +
+              '<div class="divider-y">' + guide.rules.map((r, i) => '<div style="padding:12px 0;"><div class="text-sm semi">0' + (i + 1) + '. ' + r.title + '</div><p class="text-xs muted" style="margin:4px 0 0;line-height:1.6;">' + r.detail + '</p></div>').join('') + '</div>' +
+            '</div>' +
+          '</section>' +
+        '</div>';
+    }
+
+    function renderAnalytics() {
+      const buckets = state.periodMode === 'weekly' ? computeWeeklyBuckets(state.runs, REFERENCE_DATE, 8) : computeMonthlyBuckets(state.runs, REFERENCE_DATE, 6);
+      const maxKm = Math.max(15, ...buckets.map((b) => b.distanceKm));
+      const activeIdx = (state.selectedBucketIdx !== null && buckets[state.selectedBucketIdx]) ? state.selectedBucketIdx : buckets.length - 1;
+      const activeBucket = buckets[activeIdx];
+
+      const totalKm = state.runs.reduce((a, r) => a + r.distanceKm, 0);
+      const distRows = Object.keys(WORKOUT_TYPE_LABELS).map((t) => {
+        const sub = state.runs.filter((r) => r.workoutType === t);
+        const km = sub.reduce((a, r) => a + r.distanceKm, 0);
+        const pct = totalKm > 0 ? Math.round((km / totalKm) * 100) : 0;
+        return '' +
+          '<div class="stack-sm" style="gap:6px;">' +
+            '<div class="flex justify-between text-xs"><span class="semi">' + WORKOUT_TYPE_LABELS[t] + ' <span class="muted">(' + sub.length + '회)</span></span><span class="font-mono-tab">' + km.toFixed(1) + ' km · ' + pct + '%</span></div>' +
+            '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;background:' + WORKOUT_TYPE_COLORS[t] + ';"></div></div>' +
+          '</div>';
+      }).join('');
+
+      const q = state.logSearch.trim().toLowerCase();
+      const filteredRuns = state.runs.filter((r) => {
+        const okType = state.logFilterType === 'all' || r.workoutType === state.logFilterType;
+        const okQ = !q || r.title.toLowerCase().includes(q) || (r.courseName && r.courseName.toLowerCase().includes(q)) || (r.notes && r.notes.toLowerCase().includes(q));
+        return okType && okQ;
+      });
+
+      const filteredCourses = state.courseDifficulty === '전체' ? COURSE_PRESETS : COURSE_PRESETS.filter((c) => c.difficulty === state.courseDifficulty);
+
+      const cDist = Math.max(0.5, parseFloat(state.calcDistKm) || 10);
+      const cTotalSec = Math.max(60, (parseInt(state.calcMin || '0', 10) || 0) * 60 + (parseInt(state.calcSec || '0', 10) || 0));
+      const cPace = Math.round(cTotalSec / cDist);
+      const cKmh = (cDist / (cTotalSec / 3600)).toFixed(1);
+
+      return '' +
+        '<div class="stack-lg">' +
+          '<section class="grid-12">' +
+            '<div class="lg-span-8 card stack-md">' +
+              '<div class="flex flex-wrap items-center justify-between gap-3">' +
+                '<div><h1 class="text-xl bold" style="margin:0;">주간 · 월간 러닝 통계 분석</h1><p class="text-xs muted" style="margin:4px 0 0;">기간별 누적 거리, 러닝 횟수, 평균 페이스 및 상승 고도 추이를 비교합니다.</p></div>' +
+                '<div class="seg-group">' +
+                  '<button type="button" class="seg-btn ' + (state.periodMode === 'weekly' ? 'active' : '') + '" data-action="period-mode" data-mode="weekly">주간 통계 (8주)</button>' +
+                  '<button type="button" class="seg-btn ' + (state.periodMode === 'monthly' ? 'active' : '') + '" data-action="period-mode" data-mode="monthly">월간 통계 (6개월)</button>' +
+                '</div>' +
+              '</div>' +
+
+              '<div style="display:grid;grid-template-columns:repeat(' + buckets.length + ',1fr);gap:10px;height:165px;padding-bottom:12px;border-bottom:1px solid #F1F5F9;">' +
+                buckets.map((b, i) => {
+                  const hp = b.distanceKm > 0 ? Math.max(12, (b.distanceKm / maxKm) * 100) : 5;
+                  const sel = i === activeIdx;
+                  const col = b.distanceKm === 0 ? '#F1F5F9' : sel ? '#EA580C' : '#1E293B';
+                  return '<button type="button" data-action="select-bucket" data-idx="' + i + '" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;">' +
+                    '<span class="font-mono-tab muted" style="font-size:11px;">' + (b.distanceKm > 0 ? b.distanceKm : 0) + '</span>' +
+                    '<div style="width:100%;max-width:44px;flex:1;display:flex;align-items:end;"><div style="width:100%;height:' + hp + '%;background:' + col + ';border-radius:6px 6px 0 0;"></div></div>' +
+                    '<span class="font-mono-tab text-xs ' + (sel ? 'bold accent' : 'muted') + '">' + b.label + '</span>' +
+                  '</button>';
+                }).join('') +
+              '</div>' +
+
+              (activeBucket ? (
+                '<div class="grid-kpi">' +
+                  '<div><div class="text-xs muted">선택 기간 (' + activeBucket.label + ')</div><div class="font-mono-tab text-base bold" style="margin-top:2px;">' + activeBucket.distanceKm.toFixed(1) + ' km</div></div>' +
+                  '<div><div class="text-xs muted">러닝 횟수</div><div class="font-mono-tab text-base bold" style="margin-top:2px;">' + activeBucket.runCount + '회</div></div>' +
+                  '<div><div class="text-xs muted">평균 페이스</div><div class="font-mono-tab text-base bold accent" style="margin-top:2px;">' + (activeBucket.avgPaceSec > 0 ? formatPace(activeBucket.avgPaceSec) + '/km' : '—') + '</div></div>' +
+                  '<div><div class="text-xs muted">총 시간 · 상승 고도</div><div class="font-mono-tab text-base bold" style="margin-top:2px;">' + formatDurationKorean(activeBucket.durationSec) + ' · +' + activeBucket.elevationGainM + 'm</div></div>' +
+                '</div>'
+              ) : '') +
+            '</div>' +
+
+            '<div class="lg-span-4 card stack-md">' +
+              '<h2 class="text-base bold" style="margin:0;">훈련 유형별 거리 비중</h2>' +
+              '<div class="stack-sm">' + distRows + '</div>' +
+            '</div>' +
+          '</section>' +
+
+          '<section class="card stack-md">' +
+            '<div class="flex flex-wrap items-center justify-between gap-3">' +
+              '<h2 class="text-base bold" style="margin:0;">전체 활동 일지 (클릭하여 경로 지도 · 스플릿 확인)</h2>' +
+              '<div class="flex flex-wrap items-center gap-2">' +
+                '<div style="position:relative;"><span style="position:absolute;left:10px;top:9px;color:#94A3B8;">' + svgIcon('search', 14) + '</span><input id="log-search" class="input" style="padding-left:30px;width:190px;font-size:12px;" value="' + esc(state.logSearch) + '" placeholder="제목, 코스 검색..." /></div>' +
+                '<div class="seg-group">' +
+                  '<button type="button" class="seg-btn ' + (state.logFilterType === 'all' ? 'active' : '') + '" data-action="log-filter" data-type="all">전체</button>' +
+                  Object.keys(WORKOUT_TYPE_LABELS).map((t) => '<button type="button" class="seg-btn ' + (state.logFilterType === t ? 'active' : '') + '" data-action="log-filter" data-type="' + t + '">' + WORKOUT_TYPE_LABELS[t] + '</button>').join('') +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            (filteredRuns.length === 0
+              ? '<div style="padding:36px 0;text-align:center;" class="stack-sm"><div class="text-sm muted">조건에 일치하는 러닝 기록이 없습니다.</div><button type="button" class="text-xs semi accent" data-action="log-reset">필터 초기화</button></div>'
+              : '<div class="table-wrap"><table class="data-table"><thead><tr><th>날짜</th><th>활동명 · 코스</th><th>유형</th><th class="text-right">거리</th><th class="text-right">시간</th><th class="text-right">평균 페이스</th><th class="text-right">고도</th></tr></thead><tbody>' +
+                filteredRuns.map((r) => {
+                  const sLabel = getRunShoeLabel(r);
+                  const subParts = [r.courseName, sLabel ? '러닝화: ' + sLabel : ''].filter(Boolean);
+                  return '<tr class="clickable" data-action="open-run" data-id="' + esc(r.id) + '"><td class="font-mono-tab text-xs muted">' + esc(r.date) + '</td><td><div class="semi">' + esc(r.title) + '</div>' + (subParts.length ? '<div class="text-xs muted">' + esc(subParts.join(' · ')) + '</div>' : '') + '</td><td class="text-xs">' + WORKOUT_TYPE_LABELS[r.workoutType] + '</td><td class="text-right font-mono-tab semi">' + r.distanceKm.toFixed(2) + ' km</td><td class="text-right font-mono-tab">' + formatDuration(r.durationSec) + '</td><td class="text-right font-mono-tab semi accent">' + formatPace(r.avgPaceSecPerKm) + '/km</td><td class="text-right font-mono-tab muted">+' + r.elevationGainM + 'm</td></tr>';
+                }).join('') +
+              '</tbody></table></div>') +
+          '</section>' +
+
+          '<section class="grid-12">' +
+            '<div class="lg-span-7 stack-md">' +
+              '<div class="flex flex-wrap items-center justify-between gap-3">' +
+                '<div><h2 class="text-base bold" style="margin:0;">추천 러닝 코스 (' + filteredCourses.length + '개)</h2><p class="text-xs muted" style="margin:2px 0 0;">경로 지도를 미리 확인하거나 라이브 시뮬레이터에서 바로 달려볼 수 있습니다.</p></div>' +
+                '<div class="seg-group">' +
+                  ['전체', '입문', '보통', '도전'].map((d) => '<button type="button" class="seg-btn ' + (state.courseDifficulty === d ? 'active' : '') + '" data-action="course-diff" data-diff="' + d + '">' + d + '</button>').join('') +
+                '</div>' +
+              '</div>' +
+              '<div class="grid-2">' +
+                filteredCourses.map((c) =>
+                  '<div class="card-tight flex flex-col justify-between gap-3" style="padding:0;overflow:hidden;">' +
+                    '<div>' +
+                      '<div style="aspect-ratio:4/2.4;overflow:hidden;border-bottom:1px solid #F1F5F9;">' + renderCourseCardVisual(c) + '</div>' +
+                      '<div style="padding:14px 16px;" class="stack-sm">' +
+                        '<div style="font-size:11px;" class="muted">' + esc(c.region) + ' · ' + c.difficulty + ' · ' + esc(c.surface) + '</div>' +
+                        '<div class="text-sm bold">' + esc(c.name) + '</div>' +
+                        '<div class="text-xs font-mono-tab">' + c.distanceKm + ' km · +' + c.elevationGainM + ' m</div>' +
+                        '<p class="text-xs muted" style="margin:0;line-height:1.5;">' + esc(c.description) + '</p>' +
+                      '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center gap-2" style="padding:0 16px 16px;">' +
+                      '<button type="button" class="btn-soft btn-sm" data-action="preview-course" data-id="' + c.id + '">' + svgIcon('map', 13) + '경로 보기</button>' +
+                      '<button type="button" class="btn-primary btn-sm flex-1" data-action="sim-course" data-id="' + c.id + '">' + svgIcon('play', 12) + '시뮬레이션 달리기</button>' +
+                    '</div>' +
+                  '</div>'
+                ).join('') +
+              '</div>' +
+            '</div>' +
+
+            '<div class="lg-span-5 card stack-md" style="align-self:start;">' +
+              '<div><h2 class="text-base bold" style="margin:0;">페이스 · 레이스 완주 예측 계산기</h2><p class="text-xs muted" style="margin:2px 0 0;">기준 거리와 기록을 입력하면 요구 페이스 및 풀·하프 예상 기록을 계산합니다.</p></div>' +
+              '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">' +
+                '<div><label class="label">기준 거리 (km)</label><input id="calc-dist" type="number" step="0.1" min="1" value="' + esc(state.calcDistKm) + '" class="input font-mono-tab" /></div>' +
+                '<div><label class="label">분</label><input id="calc-min" type="number" min="1" value="' + esc(state.calcMin) + '" class="input font-mono-tab" /></div>' +
+                '<div><label class="label">초</label><input id="calc-sec" type="number" min="0" max="59" value="' + esc(state.calcSec) + '" class="input font-mono-tab" /></div>' +
+              '</div>' +
+              '<div class="sub-box flex items-center justify-between">' +
+                '<div><div class="text-xs muted">요구 평균 페이스</div><div id="calc-pace-out" class="font-mono-tab text-xl bold accent">' + formatPace(cPace) + '/km</div></div>' +
+                '<div class="text-right"><div class="text-xs muted">평균 시속</div><div id="calc-kmh-out" class="font-mono-tab text-lg bold">' + cKmh + ' km/h</div></div>' +
+              '</div>' +
+              '<div class="stack-sm">' +
+                '<div class="text-xs semi">예상 레이스 완주 기록 (Riegel 공식)</div>' +
+                '<div id="calc-preds" class="grid-2" style="gap:10px;">' +
+                  '<div class="sub-box flex justify-between text-xs"><span class="muted">5K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(cDist, cTotalSec, 5)) + '</span></div>' +
+                  '<div class="sub-box flex justify-between text-xs"><span class="muted">10K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(cDist, cTotalSec, 10)) + '</span></div>' +
+                  '<div class="sub-box flex justify-between text-xs"><span class="muted">하프 21.1K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(cDist, cTotalSec, 21.0975)) + '</span></div>' +
+                  '<div class="sub-box flex justify-between text-xs"><span class="muted">풀코스 42.2K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(cDist, cTotalSec, 42.195)) + '</span></div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+        '</div>';
+    }
+
+    function renderCommunity() {
+      const authBtn = !state.user
+        ? '<button type="button" class="btn-primary btn-sm" data-action="google-signin">' + svgIcon('login', 13) + 'Google 로그인 · 클라우드 동기화</button>'
+        : '<div class="text-xs muted">로그인됨: <strong style="color:#0F172A;">' + esc(state.user.displayName || '러너') + '</strong></div>';
+
+      let body = '';
+      if (state.communitySubTab === 'feed') {
+        const postsHtml = state.posts.map((post) => {
+          const exp = state.expandedPostId === post.id;
+          return '' +
+            '<article class="card stack-md">' +
+              '<div class="flex items-start justify-between gap-4">' +
+                '<div>' +
+                  '<div class="flex items-center gap-2 text-xs muted"><strong style="color:#0F172A;">' + esc(post.authorName) + '</strong><span>·</span><span>' + WORKOUT_TYPE_LABELS[post.workoutType] + '</span><span>·</span><span>' + esc(post.createdAtLabel) + '</span></div>' +
+                  '<h3 class="text-base bold" style="margin:4px 0 0;">' + esc(post.title) + '</h3>' +
+                '</div>' +
+                '<div class="text-right shrink-0"><div class="font-mono-tab text-lg bold">' + post.distanceKm.toFixed(1) + ' km</div><div class="font-mono-tab text-xs semi accent">' + formatPace(post.avgPaceSecPerKm) + '/km · ' + formatDuration(post.durationSec) + '</div></div>' +
+              '</div>' +
+              '<p class="text-sm" style="margin:0;color:#334155;line-height:1.6;">' + esc(post.caption) + '</p>' +
+              (post.route && post.route.length > 1 ? renderRouteMap('post-' + post.id, post.route, 195, false, false) : '') +
+              '<div class="flex items-center justify-between" style="padding-top:10px;border-top:1px solid #F1F5F9;">' +
+                '<div class="flex items-center gap-4">' +
+                  '<button type="button" class="flex items-center gap-1 text-xs semi ' + (post.cheeredByMe ? 'accent' : 'muted') + '" data-action="toggle-cheer" data-id="' + esc(post.id) + '">' + svgIcon(post.cheeredByMe ? 'heartFill' : 'heart', 15) + '응원 ' + post.cheersCount + '</button>' +
+                  '<button type="button" class="flex items-center gap-1 text-xs semi muted" data-action="toggle-comments" data-id="' + esc(post.id) + '">' + svgIcon('msg', 15) + '댓글 ' + post.commentsCount + '</button>' +
+                '</div>' +
+                (post.courseName ? '<span class="text-xs muted truncate" style="max-width:200px;">' + esc(post.courseName) + '</span>' : '') +
+              '</div>' +
+              (exp ? (
+                '<div class="stack-sm" style="padding-top:12px;border-top:1px solid #F1F5F9;">' +
+                  ((post.comments && post.comments.length > 0)
+                    ? post.comments.map((c) => '<div class="sub-box text-xs"><div class="flex justify-between muted"><strong style="color:#0F172A;">' + esc(c.authorName) + '</strong><span>' + esc(c.createdAtLabel) + '</span></div><div style="margin-top:3px;color:#334155;">' + esc(c.text) + '</div></div>').join('')
+                    : '<div class="text-xs muted">첫 응원 댓글을 남겨보세요.</div>') +
+                  '<form class="flex gap-2" data-form-comment="' + esc(post.id) + '">' +
+                    '<input class="input flex-1" style="font-size:12px;" data-comment-input="' + esc(post.id) + '" value="' + esc(state.commentDrafts[post.id] || '') + '" placeholder="응원 메시지 입력..." maxlength="250" />' +
+                    '<button type="submit" class="btn-primary btn-sm" aria-label="댓글 등록">' + svgIcon('send', 14) + '</button>' +
+                  '</form>' +
+                '</div>'
+              ) : '') +
+            '</article>';
+        }).join('');
+
+        body = '' +
+          '<div class="grid-12 items-start">' +
+            '<div class="lg-span-4 card-tight stack-sm">' +
+              '<h2 class="text-base bold" style="margin:0;">내 러닝 기록 공유하기</h2>' +
+              (state.runs.length === 0 ? '<p class="text-xs muted">먼저 러닝을 기록하면 피드에 공유할 수 있습니다.</p>' : (
+                '<form id="share-post-form" class="stack-sm">' +
+                  '<div><label class="label">공유할 러닝 선택</label><select id="share-run-id" class="select" style="font-size:12px;">' +
+                    state.runs.map((r) => '<option value="' + esc(r.id) + '">' + r.date + ' · ' + esc(r.title) + ' (' + r.distanceKm + 'km)</option>').join('') +
+                  '</select></div>' +
+                  '<div><label class="label">러닝 한마디</label><textarea id="share-caption" class="textarea" rows="3" maxlength="400" placeholder="오늘 달린 코스 느낌, 페이스 전략을 동료 러너들과 나눠보세요."></textarea></div>' +
+                  '<button type="submit" class="btn-accent" style="width:100%;">커뮤니티에 공유하기</button>' +
+                '</form>'
+              )) +
+            '</div>' +
+            '<div class="lg-span-8 stack-md">' + postsHtml + '</div>' +
+          '</div>';
+      } else {
+        const chalCards = state.challenges.map((ch) => {
+          const myVal = ch.myProgress || 0;
+          const pct = Math.min(100, Math.round((myVal / Math.max(1, ch.targetValue)) * 100));
+          const sorted = [...(ch.participants || [])].sort((a, b) => b.currentValue - a.currentValue);
+          return '' +
+            '<div class="card flex flex-col justify-between gap-4">' +
+              '<div class="stack-sm">' +
+                '<div class="flex justify-between text-xs muted"><span>개설: ' + esc(ch.creatorName) + '</span><span class="font-mono-tab">' + ch.startDate.slice(5) + ' ~ ' + ch.endDate.slice(5) + '</span></div>' +
+                '<h3 class="text-base bold" style="margin:0;">' + esc(ch.title) + '</h3>' +
+                '<p class="text-xs muted" style="margin:0;line-height:1.55;">' + esc(ch.description) + '</p>' +
+                '<div class="sub-box stack-sm" style="gap:8px;">' +
+                  '<div class="flex justify-between text-xs"><span class="semi">내 진행률</span><span class="font-mono-tab bold accent">' + myVal.toFixed(ch.unit === 'km' ? 1 : 0) + ' / ' + ch.targetValue + ' ' + ch.unit + ' (' + pct + '%)</span></div>' +
+                  '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+                '</div>' +
+                '<div class="stack-sm" style="gap:6px;">' +
+                  '<div class="flex justify-between text-xs"><span class="semi">참여자 순위</span><span class="muted">총 ' + ch.participantCount + '명</span></div>' +
+                  '<div class="divider-y text-xs">' +
+                    sorted.slice(0, 4).map((p, idx) => '<div class="flex justify-between" style="padding:6px 0;"><span><span class="font-mono-tab muted" style="margin-right:8px;">' + (idx + 1) + '.</span>' + esc(p.displayName) + '</span><span class="font-mono-tab semi">' + p.currentValue.toFixed(ch.unit === 'km' ? 1 : 0) + ' ' + ch.unit + '</span></div>').join('') +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="flex items-center gap-2" style="padding-top:10px;border-top:1px solid #F1F5F9;">' +
+                '<button type="button" class="' + (ch.joinedByMe ? 'btn-soft' : 'btn-primary') + ' flex-1" data-action="join-challenge" data-id="' + esc(ch.id) + '">' + (ch.joinedByMe ? '참여 중 (나가기)' : '챌린지 참여하기') + '</button>' +
+                (ch.joinedByMe ? '<button type="button" class="btn-soft" style="background:#FFF7ED;color:#C2410C;" data-action="sync-challenge" data-id="' + esc(ch.id) + '">내 기록 반영</button>' : '') +
+              '</div>' +
+            '</div>';
+        }).join('');
+
+        body = '' +
+          '<div class="stack-md">' +
+            '<div class="flex items-center justify-between"><h2 class="text-base bold" style="margin:0;">진행 중인 그룹 챌린지</h2><button type="button" class="btn-accent btn-sm" data-action="toggle-create-chal">' + svgIcon('plus', 14) + '새 챌린지 개설</button></div>' +
+            (state.showCreateChallenge ? (
+              '<form id="create-chal-form" class="card stack-md">' +
+                '<h3 class="text-sm bold" style="margin:0;">새 그룹 챌린지 만들기</h3>' +
+                '<div class="grid-3">' +
+                  '<div><label class="label">챌린지 제목</label><input id="chal-title" class="input" placeholder="예: 12월 아침 러닝 80km 달성" required /></div>' +
+                  '<div><label class="label">목표 유형</label><select id="chal-cat" class="select"><option value="distance">누적 거리 (km)</option><option value="runs">러닝 횟수 (회)</option><option value="elevation">상승 고도 (m)</option></select></div>' +
+                  '<div><label class="label">목표치</label><input id="chal-target" type="number" min="1" value="50" class="input font-mono-tab" required /></div>' +
+                '</div>' +
+                '<div class="grid-3" style="align-items:end;">' +
+                  '<div><label class="label">챌린지 소개</label><input id="chal-desc" class="input" placeholder="목표와 참여 규칙 안내" /></div>' +
+                  '<div><label class="label">종료일</label><input id="chal-end" type="date" value="2026-12-15" class="input font-mono-tab" /></div>' +
+                  '<div class="flex justify-end gap-2"><button type="button" class="btn-soft" data-action="toggle-create-chal">취소</button><button type="submit" class="btn-primary">개설하기</button></div>' +
+                '</div>' +
+              '</form>'
+            ) : '') +
+            '<div class="grid-3">' + chalCards + '</div>' +
+          '</div>';
+      }
+
+      return '' +
+        '<div class="stack-md">' +
+          '<div class="card flex flex-wrap items-center justify-between gap-4">' +
+            '<div><h1 class="text-xl bold" style="margin:0;">러너 커뮤니티 · 그룹 챌린지</h1><p class="text-xs muted" style="margin:4px 0 0;">달리기 기록과 경로를 공유해 서로 응원하고, 목표 챌린지를 개설해 순위를 겨루세요.</p></div>' +
+            '<div class="flex flex-wrap items-center gap-3">' +
+              '<div class="seg-group">' +
+                '<button type="button" class="seg-btn ' + (state.communitySubTab === 'feed' ? 'active' : '') + '" data-action="comm-tab" data-sub="feed">' + svgIcon('users', 13) + '커뮤니티 피드</button>' +
+                '<button type="button" class="seg-btn ' + (state.communitySubTab === 'challenges' ? 'active' : '') + '" data-action="comm-tab" data-sub="challenges">' + svgIcon('trophy', 13) + '그룹 챌린지 (' + state.challenges.length + ')</button>' +
+              '</div>' +
+              authBtn +
+            '</div>' +
+          '</div>' +
+          body +
+        '</div>';
+    }
+
+    function renderModals() {
+      const root = document.getElementById('modal-root');
+      if (state.selectedRunId) {
+        const run = state.runs.find((r) => r.id === state.selectedRunId);
+        if (!run) { state.selectedRunId = null; root.innerHTML = ''; return; }
+        const shoeLabel = getRunShoeLabel(run);
+        const fast = run.splits.length ? Math.min(...run.splits.map((s) => s.paceSecPerKm)) : run.avgPaceSecPerKm;
+        const slow = run.splits.length ? Math.max(...run.splits.map((s) => s.paceSecPerKm)) : run.avgPaceSecPerKm;
+        const span = Math.max(20, slow - fast);
+        const eles = (run.route || []).filter((p) => p.ele !== undefined).map((p) => p.ele);
+        let eleSvg = '';
+        if (eles.length > 1) {
+          const minE = Math.min(...eles), maxE = Math.max(...eles), eSpan = Math.max(10, maxE - minE);
+          const pts = eles.map((e, i) => ((i / (eles.length - 1)) * 560).toFixed(1) + ',' + (84 - ((e - minE) / eSpan) * 68).toFixed(1)).join(' ');
+          eleSvg = '<div class="stack-sm"><div class="flex justify-between text-xs muted"><span class="semi" style="color:#1E293B;">고도 변화 프로파일</span><span class="font-mono-tab">최저 ' + Math.round(minE) + 'm · 최고 ' + Math.round(maxE) + 'm</span></div><div class="sub-box"><svg viewBox="0 0 560 92" style="width:100%;height:80px;"><polygon fill="#EA580C" fill-opacity="0.12" points="0,92 ' + pts + ' 560,92"/><polyline fill="none" stroke="#EA580C" stroke-width="2" points="' + pts + '"/></svg></div></div>';
+        }
+
+        root.innerHTML =
+          '<div class="modal-backdrop" data-action="close-backdrop">' +
+            '<div class="modal-panel" style="max-width:760px;">' +
+              '<div class="flex items-center justify-between gap-3" style="padding:16px 24px;border-bottom:1px solid #E2E8F0;">' +
+                '<div class="flex-1"><div class="text-xs muted"><span class="semi accent">' + WORKOUT_TYPE_LABELS[run.workoutType] + '</span> · <span class="font-mono-tab">' + run.date + ' ' + run.startTime + '</span>' + (run.courseName ? ' · ' + esc(run.courseName) : '') + '</div><h2 class="text-xl bold" style="margin:2px 0 0;">' + esc(run.title) + '</h2></div>' +
+                '<div class="flex items-center gap-2 shrink-0">' +
+                  '<button type="button" class="btn-accent btn-sm" data-action="share-run-modal" data-id="' + esc(run.id) + '">' + svgIcon('share', 13) + '커뮤니티 공유</button>' +
+                  '<button type="button" class="btn-soft btn-sm" data-action="delete-run" data-id="' + esc(run.id) + '" aria-label="삭제">' + svgIcon('trash', 14) + '</button>' +
+                  '<button type="button" class="btn-soft btn-sm" data-action="close-modal" aria-label="닫기">' + svgIcon('x', 14) + '</button>' +
+                '</div>' +
+              '</div>' +
+              '<div style="padding:24px;" class="stack-md">' +
+                '<div class="grid-kpi" style="padding-bottom:16px;border-bottom:1px solid #E2E8F0;">' +
+                  '<div><div class="text-xs muted">총 거리</div><div class="font-display text-xl bold tabular-nums">' + run.distanceKm.toFixed(2) + ' <span class="text-xs muted">km</span></div></div>' +
+                  '<div><div class="text-xs muted">운동 시간</div><div class="font-mono-tab text-xl bold">' + formatDuration(run.durationSec) + '</div></div>' +
+                  '<div><div class="text-xs muted">평균 페이스</div><div class="font-mono-tab text-xl bold accent">' + formatPace(run.avgPaceSecPerKm) + '<span class="text-xs muted">/km</span></div></div>' +
+                  '<div><div class="text-xs muted">상승 고도 / 심박</div><div class="font-mono-tab text-xl bold">+' + run.elevationGainM + 'm' + (run.avgHr ? ' <span class="text-xs muted">' + run.avgHr + ' bpm</span>' : '') + '</div></div>' +
+                '</div>' +
+                '<div class="stack-sm"><div class="text-xs semi">GPS 경로 및 구간 페이스 지도</div>' + renderRouteMap('modal-run-' + run.id, run.route, 260, true, false) + '</div>' +
+                eleSvg +
+                (run.splits.length ? (
+                  '<div class="stack-sm"><div class="flex justify-between text-xs"><span class="semi text-sm">킬로미터별 스플릿 (1km Splits)</span><span class="font-mono-tab muted">최고 구간 ' + formatPace(fast) + '/km</span></div>' +
+                  '<div class="table-wrap"><table class="data-table"><thead><tr><th>구간</th><th>페이스</th><th>상대 속도</th><th class="text-right">고도차</th><th class="text-right">심박수</th></tr></thead><tbody>' +
+                    run.splits.map((s) => {
+                      const ratio = Math.max(28, Math.min(100, 100 - ((s.paceSecPerKm - fast) / span) * 65));
+                      return '<tr><td class="font-mono-tab semi">' + (s.distanceKm < 1 ? s.km + ' (' + s.distanceKm + 'km)' : s.km + ' km') + '</td><td class="font-mono-tab semi">' + formatPace(s.paceSecPerKm) + '</td><td style="width:160px;"><div class="progress-track"><div class="progress-fill" style="width:' + ratio + '%;"></div></div></td><td class="text-right font-mono-tab muted">' + (s.elevationDiff >= 0 ? '+' : '') + s.elevationDiff + 'm</td><td class="text-right font-mono-tab muted">' + (s.avgHr ? s.avgHr + ' bpm' : '—') + '</td></tr>';
+                    }).join('') +
+                  '</tbody></table></div></div>'
+                ) : '') +
+                '<div class="flex flex-wrap justify-between gap-3 text-sm" style="padding-top:12px;border-top:1px solid #E2E8F0;"><span class="muted">' + esc(run.notes || '작성된 러닝 메모가 없습니다.') + '</span>' + (shoeLabel ? '<span class="text-xs muted">착용 러닝화: <strong style="color:#0F172A;">' + esc(shoeLabel) + '</strong></span>' : '') + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      if (state.previewCourseId) {
+        const c = COURSE_PRESETS.find((x) => x.id === state.previewCourseId);
+        if (!c) { state.previewCourseId = null; root.innerHTML = ''; return; }
+        root.innerHTML =
+          '<div class="modal-backdrop" data-action="close-backdrop">' +
+            '<div class="modal-panel" style="max-width:660px;">' +
+              '<div class="flex items-center justify-between gap-3" style="padding:16px 24px;border-bottom:1px solid #E2E8F0;">' +
+                '<div><div class="text-xs muted">' + esc(c.region) + ' · ' + c.difficulty + ' · ' + esc(c.surface) + '</div><h3 class="text-lg bold" style="margin:2px 0 0;">' + esc(c.name) + '</h3></div>' +
+                '<button type="button" class="btn-soft btn-sm" data-action="close-modal" aria-label="닫기">' + svgIcon('x', 14) + '</button>' +
+              '</div>' +
+              '<div style="padding:24px;" class="stack-md">' +
+                '<div class="flex gap-3 text-xs font-mono-tab"><span>코스 거리 ' + c.distanceKm + ' km</span><span>·</span><span>상승 고도 +' + c.elevationGainM + ' m</span></div>' +
+                renderRouteMap('preview-' + c.id, c.route, 260, true, false) +
+                '<p class="text-sm muted" style="margin:0;line-height:1.6;">' + esc(c.description) + '</p>' +
+                '<div class="flex justify-end gap-2"><button type="button" class="btn-soft" data-action="close-modal">닫기</button><button type="button" class="btn-accent" data-action="sim-course" data-id="' + c.id + '">' + svgIcon('play', 13) + '이 코스로 시뮬레이션 시작</button></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      if (state.showAddRunModal) {
+        const p = state.addRunPreset || { title: '오늘의 러닝', workoutType: 'easy', distanceKm: 5.0 };
+        const activeShoes = state.shoes.filter((s) => !s.retired);
+        const primaryShoe = activeShoes.find((s) => s.isPrimary) || activeShoes[0];
+        root.innerHTML =
+          '<div class="modal-backdrop" data-action="close-backdrop">' +
+            '<div class="modal-panel" style="max-width:520px;">' +
+              '<div class="flex items-center justify-between" style="padding:16px 24px;border-bottom:1px solid #E2E8F0;"><h2 class="text-lg bold" style="margin:0;">러닝 기록 추가</h2><button type="button" class="btn-soft btn-sm" data-action="close-modal" aria-label="닫기">' + svgIcon('x', 14) + '</button></div>' +
+              '<form id="add-run-form" style="padding:24px;" class="stack-sm">' +
+                (state.addRunError ? '<div style="background:#FFF1F2;border:1px solid #FECDD3;color:#BE123C;padding:8px 12px;border-radius:8px;font-size:12px;">' + esc(state.addRunError) + '</div>' : '') +
+                '<div><label class="label">활동 제목</label><input id="ar-title" class="input" value="' + esc(p.title) + '" maxlength="100" required /></div>' +
+                '<div class="grid-2"><div><label class="label">날짜</label><input id="ar-date" type="date" value="' + REFERENCE_DATE + '" class="input font-mono-tab" /></div><div><label class="label">훈련 유형</label><select id="ar-type" class="select">' + Object.keys(WORKOUT_TYPE_LABELS).map((t) => '<option value="' + t + '"' + (t === p.workoutType ? ' selected' : '') + '>' + WORKOUT_TYPE_LABELS[t] + '</option>').join('') + '</select></div></div>' +
+                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;"><div><label class="label">거리 (km)</label><input id="ar-dist" type="number" step="0.01" min="0.1" value="' + p.distanceKm + '" class="input font-mono-tab" /></div><div><label class="label">시간 (분)</label><input id="ar-min" type="number" min="0" value="30" class="input font-mono-tab" /></div><div><label class="label">시간 (초)</label><input id="ar-sec" type="number" min="0" max="59" value="0" class="input font-mono-tab" /></div></div>' +
+                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;"><div><label class="label">시작 시각</label><input id="ar-time" type="time" value="07:00" class="input font-mono-tab" /></div><div><label class="label">상승 고도 (m)</label><input id="ar-elev" type="number" min="0" value="25" class="input font-mono-tab" /></div><div><label class="label">평균 심박</label><input id="ar-hr" type="number" min="50" max="220" value="148" class="input font-mono-tab" /></div></div>' +
+                '<div class="grid-2"><div><label class="label">경로 코스 매핑</label><select id="ar-course" class="select">' + COURSE_PRESETS.map((c) => '<option value="' + c.id + '">' + esc(c.name) + '</option>').join('') + '</select></div><div><label class="label">착용 러닝화</label><select id="ar-shoe" class="select"><option value="">선택 안 함</option>' + activeShoes.map((s) => '<option value="' + s.id + '"' + (primaryShoe && s.id === primaryShoe.id ? ' selected' : '') + '>' + esc(s.brand + ' ' + s.model) + '</option>').join('') + '<option value="__custom__">직접 입력</option></select><input id="ar-shoe-custom" class="input" style="margin-top:6px;" maxlength="120" placeholder="또는 러닝화 직접 입력 (예: 나이키 페가수스 41)" /></div></div>' +
+                '<div><label class="label">메모 (컨디션 · 날씨)</label><textarea id="ar-notes" class="textarea" rows="2" maxlength="400" placeholder="호흡 리듬, 노면 상태, 피로도 등을 남겨보세요."></textarea></div>' +
+                '<div class="flex justify-end gap-2" style="padding-top:8px;"><button type="button" class="btn-soft" data-action="close-modal">취소</button><button type="submit" class="btn-accent">저장하기</button></div>' +
+              '</form>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      if (state.showExportModal) {
+        root.innerHTML =
+          '<div class="modal-backdrop" data-action="close-backdrop">' +
+            '<div class="modal-panel" style="max-width:540px;">' +
+              '<div class="flex items-center justify-between" style="padding:16px 24px;border-bottom:1px solid #E2E8F0;"><h2 class="text-lg bold" style="margin:0;">GitHub · Vercel 배포용 파일 받기</h2><button type="button" class="btn-soft btn-sm" data-action="close-modal" aria-label="닫기">' + svgIcon('x', 14) + '</button></div>' +
+              '<div style="padding:24px;" class="stack-md">' +
+                '<p class="text-sm muted" style="margin:0;line-height:1.6;">프레임워크나 빌드 도구 없이 <strong style="color:#0F172A;">index.html 단일 파일</strong>만으로 구성되어 있습니다. 아래 방법 중 편한 방식으로 내려받아 GitHub 저장소에 올리세요.</p>' +
+                '<div class="stack-sm">' +
+                  '<button type="button" class="btn-accent" style="width:100%;" data-action="download-source">' + svgIcon('save', 15) + 'index.html 파일 바로 다운로드</button>' +
+                  '<a href="/download/stride-github.zip" download="stride-github.zip" class="btn-primary" style="width:100%;text-decoration:none;">stride-github.zip 압축 파일 다운로드</a>' +
+                  '<button type="button" class="btn-soft" style="width:100%;" data-action="copy-source-code">index.html 전체 코드 클립보드 복사 (붙여넣기용)</button>' +
+                '</div>' +
+                '<div class="sub-box stack-sm text-xs muted" style="line-height:1.6;">' +
+                  '<div class="semi" style="color:#0F172A;">GitHub 업로드 · Vercel 배포 순서</div>' +
+                  '<div>1. GitHub 저장소 생성 후 <strong style="color:#0F172A;">index.html</strong> 파일을 업로드하거나, <em>Add file → Create new file</em>에서 파일명을 <code class="font-mono-tab">index.html</code>로 적고 복사한 코드를 붙여넣습니다.</div>' +
+                  '<div>2. Vercel에서 해당 GitHub 저장소를 Import하고 Deploy를 누르면 즉시 배포됩니다.</div>' +
+                  '<div>3. PC에서 내려받은 <code class="font-mono-tab">index.html</code>을 더블 클릭해도 바로 실행됩니다.</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      root.innerHTML = '';
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const root = document.getElementById('toast-root');
+      root.innerHTML = '<div class="toast">' + esc(msg) + '</div>';
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { root.innerHTML = ''; }, 3600);
+    }
+
+    function renderNavAndFooter() {
+      const tabs = [
+        { key: 'dashboard', label: '대시보드', icon: 'compass' },
+        { key: 'live', label: '라이브 러닝', icon: 'activity' },
+        { key: 'plan', label: '훈련 계획', icon: 'calendar' },
+        { key: 'analytics', label: '통계·기록', icon: 'bar' },
+        { key: 'community', label: '커뮤니티', icon: 'users' }
+      ];
+      document.getElementById('desktop-nav').innerHTML = tabs.map((t) =>
+        '<button type="button" class="top-nav-btn ' + (state.activeTab === t.key ? 'active' : '') + '" data-action="nav" data-tab="' + t.key + '">' + t.label + '</button>'
+      ).join('');
+      document.getElementById('mobile-nav').innerHTML = tabs.map((t) =>
+        '<button type="button" class="mobile-nav-btn ' + (state.activeTab === t.key ? 'active' : '') + '" data-action="nav" data-tab="' + t.key + '">' + svgIcon(t.icon, 19) + '<span>' + t.label + '</span></button>'
+      ).join('');
+
+      const fAuth = document.getElementById('footer-auth');
+      const isPreviewHost = window.location.protocol !== 'file:' && (window.location.hostname === 'localhost' || window.location.hostname.endsWith('.run.app'));
+      const headerActions = document.getElementById('header-actions');
+      if (headerActions) {
+        const existingExportBtn = headerActions.querySelector('[data-action="open-export-modal"]');
+        if (isPreviewHost && !existingExportBtn) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-soft';
+          btn.setAttribute('data-action', 'open-export-modal');
+          btn.textContent = 'GitHub 다운로드';
+          headerActions.insertBefore(btn, headerActions.firstChild);
+        } else if (!isPreviewHost && existingExportBtn) {
+          existingExportBtn.remove();
+        }
+      }
+      const dlBtn = isPreviewHost ? '<button type="button" class="btn-soft btn-sm" data-action="open-export-modal">GitHub 다운로드</button>' : '';
+      if (state.user) {
+        fAuth.innerHTML = dlBtn + '<span>' + esc(state.user.displayName || '러너') + ' 계정 동기화 중</span><button type="button" class="semi" style="color:#0F172A;" data-action="google-signout">로그아웃</button>';
+      } else {
+        fAuth.innerHTML = dlBtn + '<button type="button" class="semi" style="color:#334155;" data-action="google-signin">Google 로그인으로 클라우드 백업</button>';
+      }
+    }
+
+    function render() {
+      renderNavAndFooter();
+      const main = document.getElementById('app-main');
+      if (state.activeTab === 'dashboard') main.innerHTML = renderDashboard();
+      else if (state.activeTab === 'live') main.innerHTML = renderLiveRun();
+      else if (state.activeTab === 'plan') main.innerHTML = renderTrainingPlan();
+      else if (state.activeTab === 'analytics') main.innerHTML = renderAnalytics();
+      else if (state.activeTab === 'community') main.innerHTML = renderCommunity();
+      renderModals();
+    }
+
+    // Live Tracking Engine (Simulator + Real Browser Geolocation)
+    let simInterval = null, gpsWatchId = null, lastKmMark = 0, lastLapTime = 0;
+
+    function stopLiveWatchers() {
+      if (simInterval) { clearInterval(simInterval); simInterval = null; }
+      if (gpsWatchId !== null && navigator.geolocation) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+    }
+
+    function startLiveLoop() {
+      stopLiveWatchers();
+      if (state.liveMode === 'sim') {
+        const course = COURSE_PRESETS.find((c) => c.id === state.liveCourseId) || COURSE_PRESETS[0];
+        simInterval = setInterval(() => {
+          state.liveElapsedSec += state.simSpeedMult;
+          const activePace = Math.max(190, Math.round(state.simTargetPaceSec + Math.sin(Date.now() / 1800) * 8));
+          state.liveCurrentPaceSec = activePace;
+          state.liveDistKm += state.simSpeedMult / activePace;
+          const pts = course.route;
+          if (pts.length >= 2) {
+            const frac = (state.liveDistKm / course.distanceKm) % 1;
+            const exact = frac * (pts.length - 1);
+            const idx = Math.min(pts.length - 2, Math.floor(exact));
+            const t = exact - idx;
+            const a = pts[idx], b = pts[idx + 1];
+            const newPt = {
+              lat: a.lat + (b.lat - a.lat) * t,
+              lng: a.lng + (b.lng - a.lng) * t,
+              ele: a.ele + (b.ele - a.ele) * t,
+              paceSecPerKm: activePace,
+              timestamp: Date.now()
+            };
+            if (state.liveRoute.length === 0) state.liveRoute = [{ ...pts[0], paceSecPerKm: activePace }, newPt];
+            else {
+              const last = state.liveRoute[state.liveRoute.length - 1];
+              if (haversineDistanceKm(last, newPt) > 0.03 || state.liveRoute.length < 2) {
+                state.liveRoute = [...state.liveRoute.slice(-180), newPt];
+              }
+            }
+          }
+          const completed = Math.floor(state.liveDistKm);
+          if (completed > lastKmMark) {
+            lastKmMark = completed;
+            const dur = Math.max(120, state.liveElapsedSec - lastLapTime);
+            lastLapTime = state.liveElapsedSec;
+            state.liveLaps.push({ km: completed, distanceKm: 1, durationSec: dur, paceSecPerKm: dur, elevationDiff: Math.round(course.elevationGainM / course.distanceKm) });
+          }
+          if (state.activeTab === 'live') render();
+        }, 1000);
+      } else {
+        simInterval = setInterval(() => {
+          state.liveElapsedSec += 1;
+          const el = document.getElementById('live-elapsed');
+          if (el) el.textContent = formatDuration(state.liveElapsedSec);
+        }, 1000);
+        if (!('geolocation' in navigator)) {
+          state.liveGpsNotice = '이 브라우저는 GPS 위치 API를 지원하지 않습니다. 코스 시뮬레이션 모드를 이용해 주세요.';
+          render();
+          return;
+        }
+        state.liveGpsNotice = '실시간 GPS 신호를 수신하고 있습니다. 실외 이동 시 거리와 경로가 자동 측정됩니다.';
+        gpsWatchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const pt = { lat: pos.coords.latitude, lng: pos.coords.longitude, ele: pos.coords.altitude ?? 15, timestamp: pos.timestamp };
+            if (state.liveRoute.length === 0) {
+              state.liveRoute.push({ ...pt, paceSecPerKm: 330 });
+            } else {
+              const last = state.liveRoute[state.liveRoute.length - 1];
+              const dKm = haversineDistanceKm(last, pt);
+              if (dKm >= 0.005) {
+                const dSec = Math.max(1, ((pt.timestamp || Date.now()) - (last.timestamp || Date.now())) / 1000);
+                const inst = Math.min(1200, Math.max(150, Math.round(dSec / dKm)));
+                state.liveCurrentPaceSec = inst;
+                state.liveDistKm += dKm;
+                state.liveRoute.push({ ...pt, paceSecPerKm: inst });
+              }
+            }
+            if (state.activeTab === 'live') render();
+          },
+          (err) => {
+            state.liveGpsNotice = err.code === 1
+              ? '위치 권한이 거부되었습니다. 브라우저 설정에서 허용하거나 코스 시뮬레이션 모드를 사용해 보세요.'
+              : '실내 환경에서는 GPS 신호가 약할 수 있습니다. 코스 시뮬레이션 모드로 바로 테스트할 수 있습니다.';
+            if (state.activeTab === 'live') render();
+          },
+          { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+        );
+      }
+    }
+
+    function resetLiveRun() {
+      stopLiveWatchers();
+      state.liveStatus = 'idle';
+      state.liveElapsedSec = 0;
+      state.liveDistKm = 0;
+      state.liveCurrentPaceSec = 0;
+      state.liveRoute = [];
+      state.liveLaps = [];
+      state.liveGpsNotice = '';
+      lastKmMark = 0;
+      lastLapTime = 0;
+    }
+
+    // Core Data Mutations + Optional Firestore Sync
+    async function saveNewRun(run) {
+      state.runs = [run, ...state.runs].sort((a, b) => (a.date < b.date ? 1 : -1));
+      if (run.shoeId) {
+        state.shoes = state.shoes.map((s) => s.id === run.shoeId ? { ...s, distanceKm: Number((s.distanceKm + run.distanceKm).toFixed(1)) } : s);
+      }
+      saveLocalState();
+      if (state.user && state.fb) {
+        try {
+          const { doc, setDoc, serverTimestamp } = state.fb.fs;
+          await setDoc(doc(state.fb.db, 'users', state.user.uid, 'runs', run.id), {
+            userId: state.user.uid, title: run.title.slice(0, 120), date: run.date, startTime: run.startTime,
+            workoutType: run.workoutType, distanceKm: run.distanceKm, durationSec: run.durationSec,
+            avgPaceSecPerKm: run.avgPaceSecPerKm, elevationGainM: run.elevationGainM,
+            ...(run.shoeId ? { shoeId: run.shoeId } : {}), ...(run.shoeName ? { shoeName: run.shoeName.slice(0, 120) } : {}), ...(run.courseName ? { courseName: run.courseName } : {}),
+            ...(run.notes ? { notes: run.notes.slice(0, 500) } : {}),
+            route: run.route.slice(0, 180), splits: run.splits.slice(0, 90),
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+        } catch (err) { handleFsError(err, 'create', 'users/' + state.user.uid + '/runs/' + run.id); }
+      }
+      showToast('"' + run.title + '" (' + run.distanceKm.toFixed(1) + 'km) 기록이 저장되었습니다.');
+    }
+
+    async function shareRunToFeed(run, caption) {
+      const postId = 'post-' + Date.now();
+      const post = {
+        id: postId, authorId: state.user ? state.user.uid : 'me-local',
+        authorName: state.user ? (state.user.displayName || '러너') : '나 (로컬 러너)',
+        title: run.title.slice(0, 120), caption: caption.slice(0, 500),
+        workoutType: run.workoutType, distanceKm: run.distanceKm, durationSec: run.durationSec,
+        avgPaceSecPerKm: run.avgPaceSecPerKm, elevationGainM: run.elevationGainM,
+        courseName: run.courseName, route: run.route.slice(0, 100),
+        cheersCount: 0, commentsCount: 0, createdAtLabel: '방금 전', cheeredByMe: false, comments: []
+      };
+      state.posts = [post, ...state.posts];
+      state.expandedPostId = postId;
+      saveLocalState();
+      if (state.user && state.fb) {
+        try {
+          const { doc, setDoc, serverTimestamp } = state.fb.fs;
+          await setDoc(doc(state.fb.db, 'communityPosts', postId), {
+            authorId: state.user.uid, authorName: (state.user.displayName || '러너').slice(0, 60),
+            title: post.title, caption: post.caption, workoutType: post.workoutType,
+            distanceKm: post.distanceKm, durationSec: post.durationSec, avgPaceSecPerKm: post.avgPaceSecPerKm,
+            elevationGainM: post.elevationGainM, ...(post.courseName ? { courseName: post.courseName } : {}),
+            route: post.route, cheersCount: 0, commentsCount: 0, isPublic: true,
+            createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+          });
+        } catch (err) { handleFsError(err, 'create', 'communityPosts/' + postId); }
+      }
+      state.activeTab = 'community';
+      state.communitySubTab = 'feed';
+      render();
+      showToast('커뮤니티 피드에 러닝 기록을 공유했습니다.');
+    }
+
+    function computeChallengeMetric(cat, startDate, endDate) {
+      const m = state.runs.filter((r) => r.date >= startDate && r.date <= endDate);
+      if (cat === 'distance') return Number(m.reduce((a, r) => a + r.distanceKm, 0).toFixed(1));
+      if (cat === 'runs') return m.length;
+      return m.reduce((a, r) => a + r.elevationGainM, 0);
+    }
+
+    function handleFsError(err, op, path) {
+      console.error('Firestore Error:', JSON.stringify({ error: err && err.message ? err.message : String(err), op, path }));
+    }
+
+    // Dynamic Firebase Initialization via CDN (skipped gracefully on file://)
+    async function initFirebaseCdn() {
+      if (window.location.protocol === 'file:') return;
+      try {
+        const [appMod, authMod, fsMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+        ]);
+        const app = appMod.initializeApp(FIREBASE_CONFIG);
+        const db = fsMod.getFirestore(app, FIREBASE_CONFIG.firestoreDatabaseId);
+        const auth = authMod.getAuth(app);
+        const provider = new authMod.GoogleAuthProvider();
+        state.fb = { app, db, auth, provider, authMod, fs: fsMod };
+
+        // Connection test
+        try { await fsMod.getDocFromServer(fsMod.doc(db, 'test', 'connection')); } catch (e) {}
+
+        authMod.onAuthStateChanged(auth, async (u) => {
+          state.user = u;
+          if (u) {
+            try {
+              const uRef = fsMod.doc(db, 'users', u.uid);
+              const snap = await fsMod.getDoc(uRef);
+              if (!snap.exists()) {
+                await fsMod.setDoc(uRef, {
+                  uid: u.uid, displayName: (u.displayName || '러너').slice(0, 60),
+                  photoURL: (u.photoURL || '').slice(0, 500), fitnessLevel: state.plan.config.level,
+                  weeklyGoalKm: state.weeklyGoalKm, createdAt: fsMod.serverTimestamp(), updatedAt: fsMod.serverTimestamp()
+                });
+              }
+              if (u.email) {
+                await fsMod.setDoc(fsMod.doc(db, 'users', u.uid, 'private', 'info'), {
+                  uid: u.uid, email: u.email.slice(0, 254), updatedAt: fsMod.serverTimestamp()
+                }, { merge: true });
+              }
+            } catch (e) {}
+
+            // Sync runs from Firestore
+            const rq = fsMod.query(fsMod.collection(db, 'users/' + u.uid + '/runs'), fsMod.orderBy('date', 'desc'), fsMod.limit(50));
+            fsMod.onSnapshot(rq, (snap) => {
+              if (snap.empty) return;
+              const cloud = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+              const ids = new Set(cloud.map((r) => r.id));
+              state.runs = [...cloud, ...state.runs.filter((r) => !ids.has(r.id))].sort((a, b) => (a.date < b.date ? 1 : -1));
+              saveLocalState();
+              render();
+            }, (err) => handleFsError(err, 'list', 'users/' + u.uid + '/runs'));
+          }
+          renderNavAndFooter();
+          if (state.activeTab === 'community') render();
+        });
+      } catch (e) {
+        // Offline or blocked CDN: local mode keeps working seamlessly
+      }
+    }
+
+    // Event Delegation
+    document.addEventListener('click', async (e) => {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      const act = el.getAttribute('data-action');
+
+      if (act === 'nav') { state.activeTab = el.getAttribute('data-tab'); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else if (act === 'open-add-run') { state.addRunPreset = null; state.addRunError = ''; state.showAddRunModal = true; renderModals(); }
+      else if (act === 'open-export-modal') { state.showExportModal = true; renderModals(); }
+      else if (act === 'close-modal') { state.selectedRunId = null; state.previewCourseId = null; state.showAddRunModal = false; state.showExportModal = false; renderModals(); }
+      else if (act === 'close-backdrop' && e.target === el) { state.selectedRunId = null; state.previewCourseId = null; state.showAddRunModal = false; state.showExportModal = false; renderModals(); }
+      else if (act === 'edit-goal') { state.editingGoal = true; state.goalInput = String(state.weeklyGoalKm); render(); }
+      else if (act === 'save-goal') {
+        const val = parseFloat(document.getElementById('goal-input').value);
+        if (Number.isFinite(val) && val >= 5 && val <= 300) state.weeklyGoalKm = Number(val.toFixed(1));
+        state.editingGoal = false; saveLocalState(); render();
+      }
+      else if (act === 'select-day') { const idx = Number(el.getAttribute('data-idx')); state.selectedDayIdx = state.selectedDayIdx === idx ? null : idx; render(); }
+      else if (act === 'toggle-add-shoe') { state.showAddShoe = !state.showAddShoe; render(); }
+      else if (act === 'primary-shoe') { const id = el.getAttribute('data-id'); state.shoes = state.shoes.map((s) => ({ ...s, isPrimary: s.id === id })); saveLocalState(); render(); }
+      else if (act === 'delete-shoe') { const id = el.getAttribute('data-id'); state.shoes = state.shoes.filter((s) => s.id !== id); saveLocalState(); render(); }
+      else if (act === 'open-run') { state.selectedRunId = el.getAttribute('data-id'); renderModals(); }
+      else if (act === 'delete-run') {
+        const id = el.getAttribute('data-id');
+        state.runs = state.runs.filter((r) => r.id !== id);
+        state.selectedRunId = null; saveLocalState(); render(); showToast('러닝 기록이 삭제되었습니다.');
+      }
+      else if (act === 'share-run-quick' || act === 'share-run-modal') {
+        const r = state.runs.find((x) => x.id === el.getAttribute('data-id'));
+        state.selectedRunId = null;
+        if (r) shareRunToFeed(r, r.title + ' 완료! (' + r.distanceKm + 'km)');
+      }
+      else if (act === 'weather-geo') { loadWeatherByGeo(); }
+      else if (act === 'weather-city') {
+        const c = CITY_PRESETS.find((x) => x.id === el.getAttribute('data-city'));
+        if (c) { state.weatherCityId = c.id; state.weatherGeoMsg = c.label + ' 지역 기준 실시간 날씨'; fetchWeather(c.lat, c.lng, c.label); }
+      }
+      else if (act === 'weather-refresh') { if (state.weather) fetchWeather(state.weather.lat, state.weather.lng, state.weather.locationLabel); }
+      else if (act === 'map-zoom') {
+        const id = el.getAttribute('data-map-id'), delta = parseFloat(el.getAttribute('data-delta'));
+        const cur = state.mapZooms[id] || 1;
+        state.mapZooms[id] = Math.max(0.6, Math.min(3.5, Number((cur + delta).toFixed(2))));
+        render();
+      }
+      else if (act === 'map-reset') { state.mapZooms[el.getAttribute('data-map-id')] = 1; render(); }
+      else if (act === 'live-mode') { if (state.liveStatus !== 'running') { resetLiveRun(); state.liveMode = el.getAttribute('data-mode'); render(); } }
+      else if (act === 'sim-speed') { state.simSpeedMult = Number(el.getAttribute('data-mult')); render(); }
+      else if (act === 'live-start') { state.liveStatus = 'running'; startLiveLoop(); render(); }
+      else if (act === 'live-pause') { stopLiveWatchers(); state.liveStatus = 'paused'; render(); }
+      else if (act === 'live-reset') { resetLiveRun(); render(); }
+      else if (act === 'live-lap') {
+        if (state.liveStatus === 'idle') return;
+        const dur = Math.max(1, state.liveElapsedSec - lastLapTime);
+        const prevDist = state.liveLaps.reduce((a, l) => a + l.distanceKm, 0);
+        const lDist = Math.max(0.1, Number((state.liveDistKm - prevDist).toFixed(2)));
+        lastLapTime = state.liveElapsedSec;
+        state.liveLaps.push({ km: state.liveLaps.length + 1, distanceKm: lDist, durationSec: dur, paceSecPerKm: Math.round(dur / lDist), elevationDiff: 2 });
+        render();
+      }
+      else if (act === 'live-save') {
+        if (state.liveElapsedSec < 5) return;
+        const course = COURSE_PRESETS.find((c) => c.id === state.liveCourseId) || COURSE_PRESETS[0];
+        const fDist = Math.max(0.1, Number(state.liveDistKm.toFixed(2)));
+        const avgP = Math.round(state.liveElapsedSec / fDist);
+        const fRoute = state.liveRoute.length >= 2 ? state.liveRoute : course.route.slice(0, 6).map((p) => ({ ...p, paceSecPerKm: avgP }));
+          const customLiveShoe = (state.liveShoeCustom || '').trim();
+          const newRun = {
+          id: 'run-' + Date.now(),
+          title: (state.liveTitle || '').trim() || ((state.liveMode === 'gps' ? '실시간 GPS ' : course.name.split(' ')[0] + ' ') + WORKOUT_TYPE_LABELS[state.liveWorkoutType]),
+          date: REFERENCE_DATE, startTime: new Date().toTimeString().slice(0, 5), workoutType: state.liveWorkoutType,
+          distanceKm: fDist, durationSec: state.liveElapsedSec, avgPaceSecPerKm: avgP,
+          elevationGainM: Math.round(fDist * (state.liveMode === 'sim' ? course.elevationGainM / course.distanceKm : 4)),
+          calories: Math.round(fDist * 65),
+          shoeId: (!customLiveShoe && state.liveShoeId && state.liveShoeId !== '__custom__') ? state.liveShoeId : undefined,
+          shoeName: customLiveShoe ? customLiveShoe.slice(0, 120) : undefined,
+          courseName: state.liveMode === 'sim' ? course.name : 'GPS 실시간 측정 경로',
+          notes: (state.liveMode === 'gps' ? '실시간 GPS' : '코스 시뮬레이션') + '으로 기록됨',
+          route: fRoute,
+          splits: state.liveLaps.length ? state.liveLaps : [{ km: 1, distanceKm: fDist, durationSec: state.liveElapsedSec, paceSecPerKm: avgP, elevationDiff: 3 }]
+        };
+        await saveNewRun(newRun);
+        resetLiveRun(); state.liveTitle = ''; render();
+      }
+      else if (act === 'plan-week') { state.planWeekNum = Number(el.getAttribute('data-week')); render(); }
+      else if (act === 'toggle-session') {
+        const key = el.getAttribute('data-week') + '-' + el.getAttribute('data-day');
+        state.plan.completedSessions[key] = !state.plan.completedSessions[key];
+        saveLocalState(); render();
+      }
+      else if (act === 'quick-log-session') {
+        state.addRunPreset = { title: el.getAttribute('data-title'), workoutType: el.getAttribute('data-type'), distanceKm: Number(el.getAttribute('data-dist')) };
+        state.addRunError = ''; state.showAddRunModal = true; renderModals();
+      }
+      else if (act === 'period-mode') { state.periodMode = el.getAttribute('data-mode'); state.selectedBucketIdx = null; render(); }
+      else if (act === 'select-bucket') { state.selectedBucketIdx = Number(el.getAttribute('data-idx')); render(); }
+      else if (act === 'log-filter') { state.logFilterType = el.getAttribute('data-type'); render(); }
+      else if (act === 'log-reset') { state.logFilterType = 'all'; state.logSearch = ''; render(); }
+      else if (act === 'course-diff') { state.courseDifficulty = el.getAttribute('data-diff'); render(); }
+      else if (act === 'preview-course') { state.previewCourseId = el.getAttribute('data-id'); renderModals(); }
+      else if (act === 'sim-course') { state.previewCourseId = null; state.liveCourseId = el.getAttribute('data-id'); state.liveMode = 'sim'; state.activeTab = 'live'; render(); }
+      else if (act === 'comm-tab') { state.communitySubTab = el.getAttribute('data-sub'); render(); }
+      else if (act === 'toggle-cheer') {
+        const id = el.getAttribute('data-id');
+        state.posts = state.posts.map((p) => p.id === id ? { ...p, cheeredByMe: !p.cheeredByMe, cheersCount: Math.max(0, p.cheersCount + (!p.cheeredByMe ? 1 : -1)) } : p);
+        saveLocalState(); render();
+      }
+      else if (act === 'toggle-comments') { const id = el.getAttribute('data-id'); state.expandedPostId = state.expandedPostId === id ? null : id; render(); }
+      else if (act === 'toggle-create-chal') { state.showCreateChallenge = !state.showCreateChallenge; render(); }
+      else if (act === 'join-challenge') {
+        const id = el.getAttribute('data-id');
+        const myId = state.user ? state.user.uid : 'me-local', myName = state.user ? (state.user.displayName || '러너') : '나 (로컬 러너)';
+        state.challenges = state.challenges.map((ch) => {
+          if (ch.id !== id) return ch;
+          const joining = !ch.joinedByMe;
+          const myVal = computeChallengeMetric(ch.category, ch.startDate, ch.endDate);
+          const rest = (ch.participants || []).filter((p) => p.userId !== myId);
+          return {
+            ...ch, joinedByMe: joining, myProgress: joining ? myVal : 0,
+            participantCount: Math.max(0, ch.participantCount + (joining ? 1 : -1)),
+            participants: joining ? [...rest, { userId: myId, displayName: myName, currentValue: myVal }] : rest
+          };
+        });
+        saveLocalState(); render();
+      }
+      else if (act === 'sync-challenge') {
+        const id = el.getAttribute('data-id');
+        const myId = state.user ? state.user.uid : 'me-local';
+        state.challenges = state.challenges.map((ch) => {
+          if (ch.id !== id) return ch;
+          const myVal = computeChallengeMetric(ch.category, ch.startDate, ch.endDate);
+          return { ...ch, myProgress: myVal, participants: (ch.participants || []).map((p) => p.userId === myId ? { ...p, currentValue: myVal } : p) };
+        });
+        saveLocalState(); render(); showToast('챌린지 진행 기록이 업데이트되었습니다.');
+      }
+      else if (act === 'google-signin') {
+        if (window.location.protocol === 'file:' || !state.fb) {
+          showToast('Google 로그인 동기화는 웹 배포(https://) 환경에서 지원되며, 현재 로컬 저장 모드로 모든 기능을 사용할 수 있습니다.');
+          return;
+        }
+        try {
+          await state.fb.authMod.signInWithPopup(state.fb.auth, state.fb.provider);
+          showToast('Google 계정으로 클라우드 동기화가 연결되었습니다.');
+        } catch (err) { showToast('로그인 창이 닫혔거나 팝업이 차단되었습니다.'); }
+      }
+      else if (act === 'google-signout') {
+        if (state.fb) { await state.fb.authMod.signOut(state.fb.auth); state.user = null; render(); }
+      }
+      else if (act === 'download-source') {
+        try {
+          let res = await fetch('/download/index.html', { cache: 'no-store' });
+          let html = res.ok ? await res.text() : '';
+          if (!html.includes('<!DOCTYPE html>')) {
+            res = await fetch(window.location.pathname || '/', { cache: 'no-store' });
+            html = await res.text();
+          }
+          const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'index.html';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showToast('GitHub 업로드용 index.html 파일이 다운로드되었습니다.');
+        } catch (err) {
+          showToast('파일 다운로드 중 오류가 발생했습니다. 코드 복사를 이용해 주세요.');
+        }
+      }
+      else if (act === 'copy-source-code') {
+        try {
+          let res = await fetch('/download/index.html', { cache: 'no-store' });
+          let html = res.ok ? await res.text() : '';
+          if (!html.includes('<!DOCTYPE html>')) {
+            res = await fetch(window.location.pathname || '/', { cache: 'no-store' });
+            html = await res.text();
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(html);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = html;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+          }
+          showToast('index.html 전체 코드가 클립보드에 복사되었습니다.');
+        } catch (err) {
+          showToast('코드 복사에 실패했습니다.');
+        }
+      }
+    });
+
+    // Input & Change Handlers
+    document.addEventListener('input', (e) => {
+      const t = e.target;
+      if (t.id === 'sim-pace-range') {
+        state.simTargetPaceSec = Number(t.value);
+        const lbl = document.getElementById('sim-pace-lbl');
+        if (lbl) lbl.textContent = formatPace(state.simTargetPaceSec) + '/km';
+      } else if (t.id === 'live-title') { state.liveTitle = t.value; }
+      else if (t.id === 'plan-5k') {
+        const lbl = document.getElementById('plan-5k-val');
+        if (lbl) lbl.textContent = t.value + '분';
+      } else if (t.id === 'log-search') { state.logSearch = t.value; render(); const inp = document.getElementById('log-search'); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } }
+      else if (t.id === 'calc-dist' || t.id === 'calc-min' || t.id === 'calc-sec') {
+        if (t.id === 'calc-dist') state.calcDistKm = t.value;
+        if (t.id === 'calc-min') state.calcMin = t.value;
+        if (t.id === 'calc-sec') state.calcSec = t.value;
+        const d = Math.max(0.5, parseFloat(state.calcDistKm) || 10);
+        const s = Math.max(60, (parseInt(state.calcMin || '0', 10) || 0) * 60 + (parseInt(state.calcSec || '0', 10) || 0));
+        const pOut = document.getElementById('calc-pace-out'), kOut = document.getElementById('calc-kmh-out'), pr = document.getElementById('calc-preds');
+        if (pOut) pOut.textContent = formatPace(Math.round(s / d)) + '/km';
+        if (kOut) kOut.textContent = (d / (s / 3600)).toFixed(1) + ' km/h';
+        if (pr) pr.innerHTML =
+          '<div class="sub-box flex justify-between text-xs"><span class="muted">5K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(d, s, 5)) + '</span></div>' +
+          '<div class="sub-box flex justify-between text-xs"><span class="muted">10K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(d, s, 10)) + '</span></div>' +
+          '<div class="sub-box flex justify-between text-xs"><span class="muted">하프 21.1K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(d, s, 21.0975)) + '</span></div>' +
+          '<div class="sub-box flex justify-between text-xs"><span class="muted">풀코스 42.2K</span><span class="font-mono-tab bold">' + formatDuration(predictRaceTimeRiegel(d, s, 42.195)) + '</span></div>';
+      } else if (t.hasAttribute('data-comment-input')) {
+        state.commentDrafts[t.getAttribute('data-comment-input')] = t.value;
+      } else if (t.id === 'live-shoe-custom') {
+        state.liveShoeCustom = t.value;
+        if (t.value.trim()) {
+          state.liveShoeId = '__custom__';
+          const sel = document.getElementById('live-shoe');
+          if (sel) sel.value = '__custom__';
+        }
+      } else if (t.id === 'ar-shoe-custom') {
+        if (t.value.trim()) {
+          const sel = document.getElementById('ar-shoe');
+          if (sel) sel.value = '__custom__';
+        }
+      }
+    });
+
+    document.addEventListener('change', (e) => {
+      const t = e.target;
+      if (t.id === 'sim-course-select') { state.liveCourseId = t.value; render(); }
+      else if (t.id === 'live-type') { state.liveWorkoutType = t.value; }
+      else if (t.id === 'live-shoe') {
+        state.liveShoeId = t.value;
+        const inp = document.getElementById('live-shoe-custom');
+        if (t.value === '__custom__') {
+          if (inp) inp.focus();
+        } else {
+          state.liveShoeCustom = '';
+          if (inp) inp.value = '';
+        }
+      } else if (t.id === 'ar-shoe') {
+        const inp = document.getElementById('ar-shoe-custom');
+        if (t.value === '__custom__') {
+          if (inp) inp.focus();
+        } else if (inp) {
+          inp.value = '';
+        }
+      }
+    });
+
+    // Map Hover Telemetry Readout
+    document.addEventListener('mouseover', (e) => {
+      const hit = e.target.closest('[data-map-hover]');
+      if (!hit) return;
+      const box = document.getElementById('hover-' + hit.getAttribute('data-map-hover'));
+      if (box) { box.textContent = hit.getAttribute('data-hover-info'); box.style.display = 'flex'; }
+    });
+    document.addEventListener('mouseout', (e) => {
+      const hit = e.target.closest('[data-map-hover]');
+      if (!hit) return;
+      const box = document.getElementById('hover-' + hit.getAttribute('data-map-hover'));
+      if (box) box.style.display = 'none';
+    });
+
+    // Form Submissions
+    document.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = e.target;
+
+      if (f.id === 'add-shoe-form') {
+        const brand = document.getElementById('shoe-brand').value.trim();
+        const model = document.getElementById('shoe-model').value.trim();
+        const maxKm = Math.max(200, parseInt(document.getElementById('shoe-max').value || '600', 10) || 600);
+        if (!brand || !model) return;
+        state.shoes.push({ id: 'shoe-' + Date.now(), brand, model, distanceKm: 0, maxKm, isPrimary: state.shoes.length === 0, retired: false });
+        state.showAddShoe = false; saveLocalState(); render();
+      } else if (f.id === 'add-run-form') {
+        const title = document.getElementById('ar-title').value.trim();
+        const dist = parseFloat(document.getElementById('ar-dist').value);
+        const min = parseInt(document.getElementById('ar-min').value || '0', 10) || 0;
+        const sec = parseInt(document.getElementById('ar-sec').value || '0', 10) || 0;
+        const totalSec = min * 60 + sec;
+        if (!title) { state.addRunError = '러닝 제목을 입력해 주세요.'; renderModals(); return; }
+        if (!Number.isFinite(dist) || dist <= 0 || dist > 250) { state.addRunError = '거리는 0보다 크고 250km 이하로 입력해 주세요.'; renderModals(); return; }
+        if (totalSec <= 0) { state.addRunError = '운동 시간을 1초 이상 입력해 주세요.'; renderModals(); return; }
+        const avgPace = Math.round(totalSec / dist);
+        const elev = Math.max(0, parseInt(document.getElementById('ar-elev').value || '0', 10) || 0);
+        const hr = parseInt(document.getElementById('ar-hr').value || '0', 10);
+        const preset = COURSE_PRESETS.find((c) => c.id === document.getElementById('ar-course').value) || COURSE_PRESETS[0];
+        const arShoeCustom = (document.getElementById('ar-shoe-custom') ? document.getElementById('ar-shoe-custom').value : '').trim();
+        const arShoeVal = document.getElementById('ar-shoe').value;
+        const run = {
+          id: 'run-' + Date.now(), title, date: document.getElementById('ar-date').value || REFERENCE_DATE,
+          startTime: document.getElementById('ar-time').value || '07:00',
+          workoutType: document.getElementById('ar-type').value,
+          distanceKm: Number(dist.toFixed(2)), durationSec: totalSec, avgPaceSecPerKm: avgPace, elevationGainM: elev,
+          avgHr: hr >= 40 && hr <= 220 ? hr : undefined, calories: Math.round(dist * 65),
+          shoeId: (!arShoeCustom && arShoeVal && arShoeVal !== '__custom__') ? arShoeVal : undefined,
+          shoeName: arShoeCustom ? arShoeCustom.slice(0, 120) : undefined,
+          courseName: preset.name, notes: document.getElementById('ar-notes').value.trim() || undefined,
+          route: enrichRoute(preset.route, avgPace),
+          splits: generateSplitsFromTotal(dist, totalSec, elev, hr >= 40 ? hr : undefined)
+        };
+        state.showAddRunModal = false;
+        await saveNewRun(run);
+        render();
+      } else if (f.id === 'plan-form') {
+        state.plan = generatePersonalizedPlan({
+          goal: document.getElementById('plan-goal').value,
+          level: document.getElementById('plan-level').value,
+          daysPerWeek: Number(document.getElementById('plan-days').value),
+          benchmark5kMinutes: Number(document.getElementById('plan-5k').value),
+          generatedAt: new Date().toISOString().slice(0, 10)
+        });
+        state.planWeekNum = 1; saveLocalState(); render(); showToast('맞춤형 8주 훈련 계획이 생성되었습니다.');
+      } else if (f.id === 'share-post-form') {
+        const run = state.runs.find((r) => r.id === document.getElementById('share-run-id').value) || state.runs[0];
+        const cap = document.getElementById('share-caption').value.trim();
+        if (run) await shareRunToFeed(run, cap || run.distanceKm + 'km 러닝 완료!');
+      } else if (f.hasAttribute('data-form-comment')) {
+        const postId = f.getAttribute('data-form-comment');
+        const text = (state.commentDrafts[postId] || '').trim();
+        if (!text) return;
+        state.posts = state.posts.map((p) => p.id === postId ? {
+          ...p, commentsCount: p.commentsCount + 1,
+          comments: [...(p.comments || []), { id: 'c-' + Date.now(), authorId: 'me-local', authorName: state.user ? (state.user.displayName || '러너') : '나 (로컬 러너)', text: text.slice(0, 300), createdAtLabel: '방금 전' }]
+        } : p);
+        state.commentDrafts[postId] = '';
+        saveLocalState(); render();
+      } else if (f.id === 'create-chal-form') {
+        const title = document.getElementById('chal-title').value.trim();
+        const cat = document.getElementById('chal-cat').value;
+        const target = parseFloat(document.getElementById('chal-target').value);
+        const desc = document.getElementById('chal-desc').value.trim() || '함께 목표를 달성하는 러닝 챌린지입니다.';
+        const endDate = document.getElementById('chal-end').value || '2026-12-15';
+        if (!title || !Number.isFinite(target) || target <= 0) return;
+        const unit = cat === 'distance' ? 'km' : cat === 'runs' ? '회' : 'm';
+        const myVal = computeChallengeMetric(cat, REFERENCE_DATE, endDate);
+        const myName = state.user ? (state.user.displayName || '러너') : '나 (로컬 러너)';
+        state.challenges.unshift({
+          id: 'chal-' + Date.now(), creatorId: 'me-local', creatorName: myName,
+          title: title.slice(0, 100), description: desc.slice(0, 400), category: cat, targetValue: target, unit,
+          startDate: REFERENCE_DATE, endDate, participantCount: 1, joinedByMe: true, myProgress: myVal,
+          participants: [{ userId: 'me-local', displayName: myName, currentValue: myVal }]
+        });
+        state.showCreateChallenge = false; saveLocalState(); render(); showToast('"' + title + '" 챌린지가 개설되었습니다.');
+      }
+    });
+
+    // Boot
+    render();
+    loadWeatherByGeo();
+    initFirebaseCdn();
+  })();
+  </script>
+</body>
+</html>
